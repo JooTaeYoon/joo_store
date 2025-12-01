@@ -3,13 +3,20 @@ package com.joo.pro.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.data.annotation.CreatedDate;
+
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Table(name = "customer")
 @Entity
 @Setter
 @Getter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Customer {
 
     @Id
@@ -24,5 +31,9 @@ public class Customer {
 
     @Column
     private String phoneNumber;
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    @CreationTimestamp
+    private LocalDateTime createdAt;
 
 }
