@@ -1,15 +1,12 @@
 package com.joo.pro.controller;
 
+import com.joo.pro.dto.request.CustomerDtoRequest;
 import com.joo.pro.dto.response.CustomerDtoResponse;
-import com.joo.pro.service.StoreService;
+import com.joo.pro.service.CustomerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RequestMapping("/api/store")
 @RestController
@@ -17,18 +14,19 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class StoreController {
 
-    private final StoreService storeService;
+    private final CustomerService customerService;
 
     @PostMapping("/create")
-    public ResponseEntity<CustomerDtoResponse> createCustomer() {
-        log.info("createCustomer 호출됨");
-        return ResponseEntity.ok(new CustomerDtoResponse());
+    public ResponseEntity<CustomerDtoResponse> createCustomer(@RequestBody CustomerDtoRequest request) {
+        CustomerDtoResponse customer = customerService.createCustomer(request);
+        log.info("customer: {}", customer);
+        return ResponseEntity.ok(customer);
     }
 
-    @GetMapping("/test")
-    public ResponseEntity<?> test() {
-        log.info("test 호출됨");
-        return ResponseEntity.ok("test 성공");
-    }
 
+    @PutMapping("/update/{id}")
+    public ResponseEntity<CustomerDtoResponse> update(@RequestBody CustomerDtoRequest request, @PathVariable("id") Long id) {
+        log.info("update 호출됨");
+        return ResponseEntity.ok(customerService.updateCustomer(id, request));
+    }
 }
