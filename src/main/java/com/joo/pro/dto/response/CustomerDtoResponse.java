@@ -4,6 +4,9 @@ package com.joo.pro.dto.response;
 import com.joo.pro.entity.Customer;
 import lombok.*;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Setter
 @ToString
 @NoArgsConstructor
@@ -21,6 +24,12 @@ public class CustomerDtoResponse {
                 .name(customer.getName())
                 .phoneNumber(customer.getPhoneNumber())
                 .build();
+    }
+
+    public static List<CustomerDtoResponse> fromEntities(List<Customer> customers) {
+        return customers.stream()
+                .map(CustomerDtoResponse::fromEntity)
+                .collect(Collectors.toList());
     }
 
 }
