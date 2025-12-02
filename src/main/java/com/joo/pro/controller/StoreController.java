@@ -8,6 +8,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RequestMapping("/api/store")
 @RestController
 @Slf4j
@@ -24,9 +26,27 @@ public class StoreController {
     }
 
 
+    /**
+     * 손님 정보 수정
+     * @param request 손님 이름
+     * @param id 수정 할 손님 번호
+     * @return
+     * 변경 된 손님 정보
+     */
     @PutMapping("/update/{id}")
     public ResponseEntity<CustomerDtoResponse> update(@RequestBody CustomerDtoRequest request, @PathVariable("id") Long id) {
         log.info("update 호출됨");
         return ResponseEntity.ok(customerService.updateCustomer(id, request));
     }
+
+    @GetMapping("/read")
+    public ResponseEntity<List<CustomerDtoResponse>> read(){
+        return ResponseEntity.ok(customerService.readAllCustomers());
+    }
+
+    @GetMapping("/customer-one")
+    public ResponseEntity<?> getCustomer(@RequestBody CustomerDtoRequest request){
+        return ResponseEntity.ok(customerService.getCustomer(request));
+    }
+
 }

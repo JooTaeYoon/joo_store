@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -16,7 +17,15 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class CustomerServiceImpl implements CustomerService {
 
+
     private final CustomerRepository customerRepository;
+
+    @Override
+    public CustomerDtoResponse getCustomer(CustomerDtoRequest request) {
+        Customer byName = customerRepository
+                .findByName(request.getName());
+        return CustomerDtoResponse.fromEntity(byName);
+    }
 
     @Override
     public CustomerDtoResponse createCustomer(CustomerDtoRequest request) {
@@ -26,6 +35,13 @@ public class CustomerServiceImpl implements CustomerService {
                 .build();
         Customer save = customerRepository.save(customer);
         return CustomerDtoResponse.fromEntity(save);
+    }
+
+    @Override
+    public List<CustomerDtoResponse> readAllCustomers() {
+        List<Customer> all = customerRepository
+                .findAll();
+        return CustomerDtoResponse.fromEntities(all);
     }
 
     @Override
