@@ -1,7 +1,9 @@
 package com.joo.pro.controller;
 
+import com.joo.pro.dto.request.ClothesDtoRequest;
 import com.joo.pro.dto.request.CustomerDtoRequest;
 import com.joo.pro.dto.response.CustomerDtoResponse;
+import com.joo.pro.service.ClothesService;
 import com.joo.pro.service.CustomerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +19,7 @@ import java.util.List;
 public class StoreController {
 
     private final CustomerService customerService;
+    private final ClothesService clothesService;
 
     @PostMapping("/create")
     public ResponseEntity<CustomerDtoResponse> createCustomer(@RequestBody CustomerDtoRequest request) {
@@ -47,6 +50,11 @@ public class StoreController {
     @GetMapping("/customer-one")
     public ResponseEntity<?> getCustomer(@RequestBody CustomerDtoRequest request){
         return ResponseEntity.ok(customerService.getCustomer(request));
+    }
+
+    @PostMapping("/{id}/save/clothes")
+    public ResponseEntity<?> saveClothesToCustomer(@PathVariable("id") Long id, @RequestBody ClothesDtoRequest request) {
+        return ResponseEntity.ok(clothesService.saveClothes(id, request));
     }
 
 }
