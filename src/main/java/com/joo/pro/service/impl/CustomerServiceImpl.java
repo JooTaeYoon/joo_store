@@ -8,6 +8,7 @@ import com.joo.pro.service.CustomerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -21,6 +22,7 @@ public class CustomerServiceImpl implements CustomerService {
     private final CustomerRepository customerRepository;
 
     @Override
+    @Transactional
     public CustomerDtoResponse getCustomer(CustomerDtoRequest request) {
         Customer byName = customerRepository
                 .findByName(request.getName());
@@ -28,6 +30,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
+    @Transactional
     public CustomerDtoResponse createCustomer(CustomerDtoRequest request) {
         Customer customer = Customer.builder()
                 .name(request.getName())
@@ -38,6 +41,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
+    @Transactional
     public List<CustomerDtoResponse> readAllCustomers() {
         List<Customer> all = customerRepository
                 .findAll();
@@ -45,6 +49,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
+    @Transactional
     public CustomerDtoResponse updateCustomer(Long id, CustomerDtoRequest request) {
         return customerRepository.findById(id).map(c -> {
             c.setName(request.getName());
@@ -52,6 +57,5 @@ public class CustomerServiceImpl implements CustomerService {
             Customer update = customerRepository.save(c);
             return CustomerDtoResponse.fromEntity(update);
         }).orElseThrow(() -> new RuntimeException("해당 고객이 존재하지 않습니다."));
-
     }
 }

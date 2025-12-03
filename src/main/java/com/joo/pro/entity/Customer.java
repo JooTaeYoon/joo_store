@@ -36,4 +36,7 @@ public class Customer {
     @CreationTimestamp
     private LocalDateTime createdAt;
 
+    @Version
+    private Integer version;
+
 }

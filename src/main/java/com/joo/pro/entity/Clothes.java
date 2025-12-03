@@ -1,12 +1,18 @@
 package com.joo.pro.entity;
 
 import jakarta.persistence.*;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "clothes")
+@Builder
+@Getter
+@ToString
 public class Clothes {
 
     @Id
@@ -24,5 +30,6 @@ public class Clothes {
     @JoinColumn(name = "customer_id")
     private Customer customer;
 
-
+    @Column
+    private Integer count;
 }
