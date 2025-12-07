@@ -1,10 +1,10 @@
 package com.joo.pro.service;
 
-import com.joo.pro.dto.request.ClothesDtoRequest;
-import com.joo.pro.dto.response.ClothesDtoResponse;
+import com.joo.pro.dto.request.OrderRequest;
+import com.joo.pro.dto.response.OrderResponse;
 
 public interface ClothesService {
 
-    ClothesDtoResponse saveClothes(Long id, ClothesDtoRequest clothesType);
+    OrderResponse saveClothes(Long id, OrderRequest clothesType);
 
 }

@@ -5,10 +5,10 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
-import org.springframework.data.annotation.CreatedDate;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Table(name = "customer")
 @Entity
@@ -36,7 +36,7 @@ public class Customer {
     @CreationTimestamp
     private LocalDateTime createdAt;
 
-    @Version
-    private Integer version;
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Order> clothesOrders = new ArrayList<>();
 
 }
