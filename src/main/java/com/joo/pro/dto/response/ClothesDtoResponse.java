@@ -3,6 +3,8 @@ package com.joo.pro.dto.response;
 import com.joo.pro.entity.Clothes;
 import lombok.*;
 
+import java.util.List;
+
 @Data
 @Builder
 public class ClothesDtoResponse {
@@ -30,4 +32,9 @@ public class ClothesDtoResponse {
                 .build();
     }
 
+    public static List<ClothesDtoResponse> fromEntities(List<Clothes> clothesList) {
+        return clothesList.stream()
+                .map(ClothesDtoResponse::fromEntity)
+                .toList();
+    }
 }

@@ -51,10 +51,14 @@ public class Clothes {
     @Enumerated(EnumType.STRING)
     private STATUS status;
 
+    public void setStatus(STATUS status) {
+        this.status = status;
+    }
+
     @Getter
     public enum STATUS {
         ALL_PICKED("모두 찾아감"),   // 모두 찾아감
-        PARTIAL("일부 찾아감"),      // 일부 찾아감
+        PARTIAL("찾아감"),      // 일부 찾아감
         NONE("하나도 안 찾아감");          // 아직 하나도 안 찾아감
 
         private String korean;

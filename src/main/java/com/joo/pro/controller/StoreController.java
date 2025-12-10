@@ -2,6 +2,7 @@ package com.joo.pro.controller;
 
 import com.joo.pro.dto.request.CustomerDtoRequest;
 import com.joo.pro.dto.request.OrderRequest;
+import com.joo.pro.dto.request.PickupDtoRequest;
 import com.joo.pro.dto.response.CustomerDtoResponse;
 import com.joo.pro.service.ClothesService;
 import com.joo.pro.service.CustomerService;
@@ -60,5 +61,17 @@ public class StoreController {
     @PostMapping("/{id}/save/clothes")
     public ResponseEntity<?> saveClothesToCustomer(@PathVariable("id") Long id, @RequestBody OrderRequest request) {
         return ResponseEntity.ok(clothesService.saveClothes(id, request));
+    }
+
+    /**
+     * 옷 찾기
+     * @param id 손님 id
+     * @param request 옷 정보
+     * @return
+     */
+    @PostMapping("/{id}/get/clothes")
+    public ResponseEntity<?> getClothesFromCustomer(@PathVariable("id") Long id, @RequestBody PickupDtoRequest clothesId){
+        System.out.println("hi");
+        return ResponseEntity.ok(clothesService.getClothes(id, clothesId));
     }
 }
