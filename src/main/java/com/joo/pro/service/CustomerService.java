@@ -13,5 +13,6 @@ public interface CustomerService {
 
     List<CustomerDtoResponse> readAllCustomers();
 
-    CustomerDtoResponse getCustomer(CustomerDtoRequest request);
+    List<CustomerDtoResponse> getCustomer(CustomerDtoRequest request);
+
 }
