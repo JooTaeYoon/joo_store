@@ -57,7 +57,7 @@ const registerCustomer = async () => {
   try {
     // API 호출 (백엔드에서 Customer 객체를 JSON으로 받도록 설정되어 있다고 가정)
     const response = await axios.post(API_URL, customer.value);
-    console.log(response.data);
+    console.log('response.data: ', response.data);
 
     // 성공 처리
     isSuccess.value = true;

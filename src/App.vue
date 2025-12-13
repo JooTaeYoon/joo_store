@@ -1,24 +1,23 @@
-<script setup>
-import RegisterView from './view/RegisterView.vue';
-</script>
-
 <template>
   <div id="app">
-    <RegisterView />
+    <nav class="main-nav">
+      <router-link to="/customers">📋 손님 목록</router-link>
+      <router-link to="/register">📝 손님 등록</router-link>
+    </nav>
+
+    <main>
+      <router-view></router-view>
+    </main>
   </div>
 </template>
 
+<script setup>
+// import RegisterView from './view/RegisterView.vue'; // 임포트 필요 없으면 삭제
+</script>
+
 <style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
+/* 여기에 내비게이션 및 앱 스타일 추가 */
+.main-nav {
+  /* 스타일 */
 }
 </style>
