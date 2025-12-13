@@ -1,8 +1,11 @@
 package com.joo.pro.service.impl;
 
 import com.joo.pro.dto.request.CustomerDtoRequest;
+import com.joo.pro.dto.response.ClothesDtoResponse;
 import com.joo.pro.dto.response.CustomerDtoResponse;
+import com.joo.pro.entity.Clothes;
 import com.joo.pro.entity.Customer;
+import com.joo.pro.repository.ClothesRepository;
 import com.joo.pro.repository.CustomerRepository;
 import com.joo.pro.service.CustomerService;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +23,7 @@ public class CustomerServiceImpl implements CustomerService {
 
 
     private final CustomerRepository customerRepository;
+    private final ClothesRepository clothesRepository;
 
     @Override
     @Transactional
@@ -28,6 +32,7 @@ public class CustomerServiceImpl implements CustomerService {
                 .findAllByName(request.getName());
         return CustomerDtoResponse.fromEntityList(byName);
     }
+
 
     @Override
     @Transactional
@@ -53,11 +58,17 @@ public class CustomerServiceImpl implements CustomerService {
     public CustomerDtoResponse updateCustomer(Long id, CustomerDtoRequest request) {
         return customerRepository.findById(id).map(c -> {
             c.setName(request.getName());
-            if(request.getPhoneNumber() != null){
+            if (request.getPhoneNumber() != null) {
                 c.setPhoneNumber(request.getPhoneNumber());
             }
             Customer update = customerRepository.save(c);
             return CustomerDtoResponse.fromEntity(update);
         }).orElseThrow(() -> new RuntimeException("해당 고객이 존재하지 않습니다."));
+    }
+
+    @Override
+    public List<ClothesDtoResponse> getCustomerClothes(Long id) {
+        List<Clothes> byIdAndOrderIdCustomerId = clothesRepository.findAllByOrderIdCustomerId(id);
+        return ClothesDtoResponse.fromEntities(byIdAndOrderIdCustomerId);
     }
 }
