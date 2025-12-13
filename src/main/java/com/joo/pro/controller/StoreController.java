@@ -3,6 +3,7 @@ package com.joo.pro.controller;
 import com.joo.pro.dto.request.CustomerDtoRequest;
 import com.joo.pro.dto.request.OrderRequest;
 import com.joo.pro.dto.request.PickupDtoRequest;
+import com.joo.pro.dto.response.ClothesDtoResponse;
 import com.joo.pro.dto.response.CustomerDtoResponse;
 import com.joo.pro.service.ClothesService;
 import com.joo.pro.service.CustomerService;
@@ -36,6 +37,15 @@ public class StoreController {
     }
 
     /**
+     * 손님 정보 가져오기
+     * @return
+     */
+    @GetMapping("/get/customer")
+    public ResponseEntity<?> getCustomer() {
+        return ResponseEntity.ok("hello");
+    }
+
+    /**
      * 손님 정보 수정
      *
      * @param request 손님 이름
@@ -48,16 +58,33 @@ public class StoreController {
         return ResponseEntity.ok(customerService.updateCustomer(id, request));
     }
 
+    /**
+     * 모든 손님 정보 가져오기
+     *
+     * @return
+     */
     @GetMapping("/read")
     public ResponseEntity<List<CustomerDtoResponse>> read() {
         return ResponseEntity.ok(customerService.readAllCustomers());
     }
 
+    /**
+     * 한명 손님 정보 가져오기
+     *
+     * @param request
+     * @return
+     */
     @GetMapping("/customer-one")
-    public ResponseEntity<?> getCustomer(@RequestBody CustomerDtoRequest request) {
+    public ResponseEntity<List<CustomerDtoResponse>> getCustomer(@RequestBody CustomerDtoRequest request) {
         return ResponseEntity.ok(customerService.getCustomer(request));
     }
 
+    /**
+     * 손님 옷 저장
+     * @param id 손님 id
+     * @param request 옷 정보
+     * @return
+     */
     @PostMapping("/{id}/save/clothes")
     public ResponseEntity<?> saveClothesToCustomer(@PathVariable("id") Long id, @RequestBody OrderRequest request) {
         return ResponseEntity.ok(clothesService.saveClothes(id, request));
@@ -65,13 +92,13 @@ public class StoreController {
 
     /**
      * 옷 찾기
-     * @param id 손님 id
+     *
+     * @param id      손님 id
      * @param request 옷 정보
      * @return
      */
     @PostMapping("/{id}/get/clothes")
-    public ResponseEntity<?> getClothesFromCustomer(@PathVariable("id") Long id, @RequestBody PickupDtoRequest clothesId){
-        System.out.println("hi");
+    public ResponseEntity<List<ClothesDtoResponse>> getClothesFromCustomer(@PathVariable("id") Long id, @RequestBody PickupDtoRequest clothesId) {
         return ResponseEntity.ok(clothesService.getClothes(id, clothesId));
     }
 }

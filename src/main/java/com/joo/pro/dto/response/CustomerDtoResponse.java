@@ -32,4 +32,10 @@ public class CustomerDtoResponse {
                 .collect(Collectors.toList());
     }
 
+    public static List<CustomerDtoResponse> fromEntityList(List<Customer> customers) {
+        return customers.stream()
+                .map(CustomerDtoResponse::fromEntity)
+                .collect(Collectors.toList());
+    }
+
 }

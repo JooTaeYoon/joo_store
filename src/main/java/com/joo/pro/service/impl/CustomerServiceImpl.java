@@ -23,10 +23,10 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     @Transactional
-    public CustomerDtoResponse getCustomer(CustomerDtoRequest request) {
-        Customer byName = customerRepository
-                .findByName(request.getName());
-        return CustomerDtoResponse.fromEntity(byName);
+    public List<CustomerDtoResponse> getCustomer(CustomerDtoRequest request) {
+        List<Customer> byName = customerRepository
+                .findAllByName(request.getName());
+        return CustomerDtoResponse.fromEntityList(byName);
     }
 
     @Override
@@ -53,7 +53,9 @@ public class CustomerServiceImpl implements CustomerService {
     public CustomerDtoResponse updateCustomer(Long id, CustomerDtoRequest request) {
         return customerRepository.findById(id).map(c -> {
             c.setName(request.getName());
-            c.setPhoneNumber(request.getPhoneNumber());
+            if(request.getPhoneNumber() != null){
+                c.setPhoneNumber(request.getPhoneNumber());
+            }
             Customer update = customerRepository.save(c);
             return CustomerDtoResponse.fromEntity(update);
         }).orElseThrow(() -> new RuntimeException("해당 고객이 존재하지 않습니다."));
