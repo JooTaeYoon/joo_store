@@ -77,8 +77,8 @@ const props = defineProps({
 });
 
 // API 주소 정의
-const API_BASE = '/api/store';
-const API_ONE = `${API_BASE}/customer-one`;
+const API_BASE = 'http://localhost:8080/api/store';
+const API_ONE = `${API_BASE}`;
 const API_UPDATE = `${API_BASE}/update`;
 const API_SAVE_CLOTHES = (id) => `${API_BASE}/${id}/save/clothes`;
 
@@ -105,8 +105,7 @@ const newClothes = ref({
 const fetchCustomer = async () => {
   isLoading.value = true;
   try {
-    // API: /api/store/customer-one/{id} 가정
-    const response = await axios.get(`${API_ONE}/${props.id}`);
+    const response = await axios.get(`${API_BASE}/${props.id}/get`);
     customer.value = response.data;
   } catch (error) {
     console.error('Fetch one customer error:', error);

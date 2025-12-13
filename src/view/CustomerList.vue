@@ -20,16 +20,13 @@
       <table class="customer-table">
         <thead>
           <tr>
-            <th>ID</th>
             <th>이름</th>
             <th>전화번호</th>
             <th>등록일</th>
-            <th>관리</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="customer in customers" :key="customer.id">
-            <td>{{ customer.id }}</td>
             <td>{{ customer.name }}</td>
             <td>{{ formatPhoneNumber(customer.phoneNumber) }}</td>
             <td>{{ formatDate(customer.createdAt) }}</td>
@@ -57,7 +54,7 @@ import { useRouter } from 'vue-router';
 import axios from 'axios';
 
 // API 주소
-const API_URL = '/api/store/get';
+const API_URL = 'http://localhost:8080/api/store/get';
 
 // 이 컴포넌트가 부모에게 이벤트를 전달할 수 있도록 정의 (예: 특정 손님 ID를 선택했을 때)
 const emit = defineEmits(['selectCustomer']);
@@ -65,6 +62,7 @@ const emit = defineEmits(['selectCustomer']);
 const router = useRouter();
 
 const goToCustomerDetail = (id) => {
+  console.log('Navigating to customer detail for ID:', id);
   router.push({ name: 'CustomerDetail', params: { id } });
 };
 
