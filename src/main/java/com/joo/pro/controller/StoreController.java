@@ -7,6 +7,9 @@ import com.joo.pro.dto.response.ClothesDtoResponse;
 import com.joo.pro.dto.response.CustomerDtoResponse;
 import com.joo.pro.service.ClothesService;
 import com.joo.pro.service.CustomerService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +21,7 @@ import java.util.List;
 @RestController
 @Slf4j
 @RequiredArgsConstructor
+@Tag(name = "StoreController", description = "옷가게 컨트롤러")
 public class StoreController {
 
     private final CustomerService customerService;
@@ -30,6 +34,7 @@ public class StoreController {
      * @return request와 동일값
      */
     @PostMapping("/create")
+    @Operation(summary = "손님 등록", description = "손님 이름, 손님 번호를 받아 손님을 등록합니다.")
     public ResponseEntity<CustomerDtoResponse> createCustomer(@RequestBody CustomerDtoRequest request) {
         CustomerDtoResponse customer = customerService.createCustomer(request);
         log.info("customer: {}", customer);
@@ -41,6 +46,7 @@ public class StoreController {
      * @return
      */
     @GetMapping("/get/customer")
+    @Operation(summary = "손님 정보 가져오기", description = "손님 정보를 가져옵니다.")
     public ResponseEntity<?> getCustomer() {
         return ResponseEntity.ok("hello");
     }
@@ -53,6 +59,7 @@ public class StoreController {
      * @return 변경 된 손님 정보
      */
     @PutMapping("/update/{id}")
+    @Operation(summary = "손님 정보 수정", description = "손님 이름을 받아 손님 정보를 수정합니다.")
     public ResponseEntity<CustomerDtoResponse> update(@RequestBody CustomerDtoRequest request, @PathVariable("id") Long id) {
         log.info("update 호출됨");
         return ResponseEntity.ok(customerService.updateCustomer(id, request));
@@ -63,8 +70,9 @@ public class StoreController {
      *
      * @return
      */
-    @GetMapping("/read")
-    public ResponseEntity<List<CustomerDtoResponse>> read() {
+    @GetMapping("/get")
+    @Operation(summary = "모든 손님 정보 가져오기", description = "모든 손님 정보를 가져옵니다.")
+    public ResponseEntity<List<CustomerDtoResponse>> get() {
         return ResponseEntity.ok(customerService.readAllCustomers());
     }
 
@@ -75,6 +83,7 @@ public class StoreController {
      * @return
      */
     @GetMapping("/customer-one")
+    @Operation(summary = "한명 손님 정보 가져오기", description = "한명 손님 정보를 가져옵니다.")
     public ResponseEntity<List<CustomerDtoResponse>> getCustomer(@RequestBody CustomerDtoRequest request) {
         return ResponseEntity.ok(customerService.getCustomer(request));
     }
@@ -86,6 +95,7 @@ public class StoreController {
      * @return
      */
     @PostMapping("/{id}/save/clothes")
+    @Operation(summary = "손님 옷 저장", description = "손님이 맡긴 옷 정보를 저장합니다.")
     public ResponseEntity<?> saveClothesToCustomer(@PathVariable("id") Long id, @RequestBody OrderRequest request) {
         return ResponseEntity.ok(clothesService.saveClothes(id, request));
     }
@@ -98,7 +108,20 @@ public class StoreController {
      * @return
      */
     @PostMapping("/{id}/get/clothes")
+    @ApiResponse(description = "옷 찾기")
+    @Operation(summary = "옷 찾기", description = "손님이 맡긴 옷 정보를 가져옵니다.")
     public ResponseEntity<List<ClothesDtoResponse>> getClothesFromCustomer(@PathVariable("id") Long id, @RequestBody PickupDtoRequest clothesId) {
         return ResponseEntity.ok(clothesService.getClothes(id, clothesId));
+    }
+
+    /**
+     * 손님 옷 정보 가져오기
+     * @param id 손님 id
+     * @return 손님이 맡긴 옷 정보
+     */
+    @GetMapping("/customer/{id}/clothes")
+    @Operation(summary = "손님 옷 정보 가져오기", description = "손님이 맡긴 옷 정보를 가져옵니다.")
+    public ResponseEntity<List<ClothesDtoResponse>> getCustomerClothes(@PathVariable("id") Long id) {
+        return ResponseEntity.ok(customerService.getCustomerClothes(id));
     }
 }

@@ -2,6 +2,7 @@ package com.joo.pro.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.joo.pro.entity.Clothes;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
 @ToString
@@ -9,6 +10,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Schema(description = "옷 찾기 요청 DTO")
 public class ClothesDtoRequest {
 
     private String clothesType;
