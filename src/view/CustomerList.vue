@@ -62,7 +62,6 @@ const emit = defineEmits(['selectCustomer']);
 const router = useRouter();
 
 const goToCustomerDetail = (id) => {
-  console.log('Navigating to customer detail for ID:', id);
   router.push({ name: 'CustomerDetail', params: { id } });
 };
 
