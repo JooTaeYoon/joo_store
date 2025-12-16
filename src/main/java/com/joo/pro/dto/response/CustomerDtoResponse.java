@@ -19,10 +19,13 @@ public class CustomerDtoResponse {
 
     private String phoneNumber;
 
+    private Long id;
+
     public static CustomerDtoResponse fromEntity(Customer customer) {
         return CustomerDtoResponse.builder()
                 .name(customer.getName())
                 .phoneNumber(customer.getPhoneNumber())
+                .id(customer.getId())
                 .build();
     }
 

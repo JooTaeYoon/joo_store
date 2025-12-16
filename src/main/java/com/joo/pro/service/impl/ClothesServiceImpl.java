@@ -32,33 +32,32 @@ public class ClothesServiceImpl implements ClothesService {
 
     @Override
     @Transactional
-    public OrderResponse saveClothes(Long id, OrderRequest request) {
+    public OrderResponse saveClothes(Long id, List<OrderRequest> request) {
 
 //        고객 찾기
         Customer customer = customerRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("해당 고객이 존재하지 않습니다."));
 
         Order order = Order.builder()
-                .count(request.getCount())
+//                .count(request.getCount())
                 .customer(customer)
 //                .clothes(request.getClothesList())
                 .build();
 
-        for (ClothesDtoRequest dto : request.getClothesList()) {
+        for (OrderRequest dto : request) {
+            Clothes.SERVICE_TYPE serviceType = Clothes.SERVICE_TYPE.valueOf(dto.getServiceType().toUpperCase());
             Clothes clothes = Clothes.builder()
                     .clothesType(dto.getClothesType())
-                    .serviceType(dto.getServiceType())
-                    .category(dto.getCategory())
+                    .serviceType(serviceType)
+                    .category(Clothes.CATEGORY.valueOf(dto.getCategory().toUpperCase()))
                     .comment(dto.getComment())
-                    .status(dto.getStatus())
+                    .status(Clothes.STATUS.valueOf(dto.getStatus().toUpperCase()))
                     .orderId(order)
                     .build();
             order.getClothes().add(clothes);
             clothesRepository.save(clothes);
         }
-
         orderRepository.save(order);
-
         return OrderResponse.fromEntity(order);
     }
 
@@ -81,7 +80,8 @@ public class ClothesServiceImpl implements ClothesService {
                     .ifPresentOrElse(
                             c -> {
                                 log.info("c >>> {}", c);
-                                c.setStatus(Clothes.STATUS.PARTIAL);
+                                // TODO:  옷 찾아감 구현
+//                                c.setStatus(Clothes.STATUS.PARTIAL);
                             },
                             () -> {
                                 throw new RuntimeException("해당 옷이 존재하지 않습니다.");
