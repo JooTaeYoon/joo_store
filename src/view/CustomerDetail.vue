@@ -37,7 +37,7 @@
           class="clothes-item-group"
         >
           <div class="clothes-item-header">
-            {{ index + 1 }}번째 옷
+            **{{ index + 1 }}번째 품목**
             <button
               v-if="clothesList.length > 1"
               @click="removeClothesForm(index)"
@@ -48,40 +48,82 @@
             </button>
           </div>
 
-          <div class="form-group">
-            <label :for="'clothesType-' + index">옷 종류:</label>
-            <input
-              type="text"
-              :id="'clothesType-' + index"
-              v-model="item.clothesType"
-              required
-            />
+          <div class="form-group category-group">
+            <label>👚 종류:</label>
+            <div class="radio-options">
+              <label class="categories">
+                <input
+                  type="radio"
+                  :name="'category-' + index"
+                  v-model="item.category"
+                  value="TOP"
+                  required
+                />
+                상의
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  :name="'category-' + index"
+                  v-model="item.category"
+                  value="BOTTOM"
+                  required
+                />
+                하의
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  :name="'category-' + index"
+                  v-model="item.category"
+                  value="ETC"
+                  required
+                />
+                기타
+              </label>
+            </div>
           </div>
+
+          <div class="form-row">
+            <div class="form-group half-width">
+              <label>서비스:</label>
+              <select v-model="item.serviceType">
+                <option value="DRY_CLEAN" selected>드라이</option>
+                <option value="WASH">세탁</option>
+                <option value="IRON">다림질</option>
+                <option value="ALTERATION">수선</option>
+              </select>
+            </div>
+            <div class="form-group half-width">
+              <label>상태:</label>
+              <select v-model="item.status">
+                <option value="NONE" selected>이상 없음</option>
+                <option value="DEFECT">이상 있음</option>
+              </select>
+            </div>
+          </div>
+
           <div class="form-group">
             <label :for="'comment-' + index">특이사항/요청사항:</label>
-            <input
-              type="text"
-              :id="'comment-' + index"
-              v-model="item.comment"
-            />
+            <input type="text" v-model="item.comment" />
           </div>
           <hr v-if="index < clothesList.length - 1" class="item-separator" />
         </div>
 
         <div class="plus-btn-container">
           <button @click="addClothesForm" type="button" class="plus-btn">
-            + 옷 추가
+            + 추가
           </button>
         </div>
 
         <button
           type="submit"
-          :disabled="isSavingClothes || clothesList.length === 0"
+          :disabled="isSavingClothes || totalClothesCount === 0"
         >
           {{
             isSavingClothes
               ? '저장 중...'
-              : '총 ' + clothesList.length + ' 벌 접수 완료'
+              : '총 ' + totalClothesCount + ' 벌 접수 완료'
           }}
         </button>
       </form>
@@ -131,12 +173,16 @@ const isSavingClothes = ref(false);
 const saveMessage = ref('');
 const isSaveSuccess = ref(false);
 
+const totalClothesCount = ref(1);
+
 // 🛑 변경된 부분: 단일 객체 대신 배열을 사용하여 여러 벌의 옷 정보를 담습니다.
 const clothesList = ref([
   {
     clothesType: '',
+    category: '',
+    serviceType: 'DRY_CLEAN',
+    status: 'NONE',
     comment: '',
-    // 기타 필드 추가 가능
   },
 ]);
 
@@ -146,8 +192,12 @@ const clothesList = ref([
 const addClothesForm = () => {
   clothesList.value.push({
     clothesType: '',
+    category: '',
+    serviceType: 'DRY_CLEAN',
+    status: 'PENDING',
     comment: '',
   });
+  totalClothesCount.value++;
 };
 
 /**
@@ -155,6 +205,7 @@ const addClothesForm = () => {
  */
 const removeClothesForm = (index) => {
   clothesList.value.splice(index, 1);
+  totalClothesCount.value--;
 };
 
 // 3. 옷 접수 및 저장 (API 호출 수정)
@@ -163,14 +214,19 @@ const saveClothes = async () => {
   saveMessage.value = '';
   isSaveSuccess.value = false;
 
+  console.log(clothesList);
+
   // 🛑 API 호출 시 clothesList 배열 전체를 전송합니다.
   try {
     const api = API_SAVE_CLOTHES(props.id);
-
-    console.log('POST to API:', api);
+    console.log(clothesList.value);
 
     // clothesList 배열을 백엔드로 전송
-    await axios.post(api, clothesList.value);
+    await axios.post(api, clothesList.value, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
 
     isSaveSuccess.value = true;
     saveMessage.value = `총 ${clothesList.value.length} 벌 접수 완료!`;
@@ -179,9 +235,13 @@ const saveClothes = async () => {
     clothesList.value = [
       {
         clothesType: '',
+        category: '',
+        serviceType: 'DRY_CLEAN',
+        status: 'PENDING',
         comment: '',
       },
     ];
+    totalClothesCount.value = 1;
   } catch (error) {
     isSaveSuccess.value = false;
     saveMessage.value = '옷 접수 실패: 서버 오류가 발생했습니다.';
@@ -318,5 +378,47 @@ input {
 .error {
   color: #ff4d4f;
   font-weight: bold;
+}
+
+.form-row {
+  display: flex;
+  justify-content: space-around;
+}
+/* CustomerDetail.vue의 <style scoped> 섹션 수정 */
+
+/* 1. 라디오 버튼 컨테이너 */
+.radio-options {
+  display: flex;
+
+  /* 🛑 space-between 대신 중앙 정렬을 사용해도 되지만, 1/3 비율을 위해 하위 항목에 flex 속성을 줍니다. */
+  /* 만약 space-between을 유지하려면 아래 2번을 반드시 적용해야 합니다. */
+  justify-content: space-between;
+
+  /* padding과 border 등 기존 스타일 유지 */
+  padding: 10px 0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  /* background-color: #ffffff; */
+}
+
+/* 2. 🛑 각 라디오 버튼 항목 (label)에 균등 분배 속성 적용 */
+.radio-options label {
+  display: flex;
+  align-items: center;
+  font-weight: normal;
+
+  /* 🛑 핵심 수정: 세 항목이 공간을 균등하게 나누어 갖도록 설정 */
+  flex-grow: 1; /* 남는 공간을 모두 채웁니다 */
+  flex-basis: 0; /* 기준 너비를 0으로 설정하여 flex-grow가 제대로 작동하게 합니다 */
+
+  /* 🛑 텍스트가 중앙에 오도록 내부 정렬 */
+  justify-content: center;
+
+  margin-left: 0; /* 기존 margin-left: 10px;를 제거하고 중앙 정렬 */
+}
+
+.radio-options input[type='radio'] {
+  width: auto;
+  margin-right: 5px;
 }
 </style>
