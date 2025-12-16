@@ -9,6 +9,7 @@ import lombok.*;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@Setter
 @Builder
 @Schema(description = "옷 찾기 요청 DTO")
 public class ClothesDtoRequest {

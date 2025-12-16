@@ -71,4 +71,11 @@ public class CustomerServiceImpl implements CustomerService {
         List<Clothes> byIdAndOrderIdCustomerId = clothesRepository.findAllByOrderIdCustomerId(id);
         return ClothesDtoResponse.fromEntities(byIdAndOrderIdCustomerId);
     }
+
+    @Override
+    public CustomerDtoResponse getCustomerInfo(Long id) {
+        return customerRepository.findById(id)
+                .map(CustomerDtoResponse::fromEntity)
+                .orElseThrow(() -> new RuntimeException("해당 고객이 존재하지 않습니다."));
+    }
 }

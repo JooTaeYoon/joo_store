@@ -1,5 +1,7 @@
 package com.joo.pro.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.joo.pro.entity.Clothes;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,11 +14,13 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class OrderRequest {
 
-    private Integer count;
-
-    private List<ClothesDtoRequest> clothesList;
+    private String clothesType;
+    private String comment;
+    private String category;
+    private String serviceType;
+    private String status;
 
 }
-

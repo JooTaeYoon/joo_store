@@ -18,4 +18,6 @@ public interface CustomerService {
 
     List<ClothesDtoResponse> getCustomerClothes(Long id);
 
+    CustomerDtoResponse getCustomerInfo(Long id);
+
 }

@@ -43,11 +43,11 @@ public class Clothes {
     private String comment;
 
     //    드라이, 세탁, 다림질 등 어떤 서비스를 요청했는지 기록
-    @Column
+    @Column(columnDefinition = "VARCHAR(100)")
     @Enumerated(EnumType.STRING)
     private SERVICE_TYPE serviceType;
 
-    @Column
+    @Column(columnDefinition = "VARCHAR(100)")
     @Enumerated(EnumType.STRING)
     private STATUS status;
 
@@ -57,9 +57,8 @@ public class Clothes {
 
     @Getter
     public enum STATUS {
-        ALL_PICKED("모두 찾아감"),   // 모두 찾아감
-        PARTIAL("찾아감"),      // 일부 찾아감
-        NONE("하나도 안 찾아감");          // 아직 하나도 안 찾아감
+        DEFECT("이상 있음"),   // 모두 찾아감
+        NONE("이상 없음");          // 아직 하나도 안 찾아감
 
         private String korean;
 
@@ -73,14 +72,10 @@ public class Clothes {
                 throw new IllegalAccessException("상태 값이 비었습니다");
             }
             switch (value.toLowerCase()) {
-                case "all_picked":
-                case "ALL_PICKED":
-                case "All_Picked":
-                    return ALL_PICKED;
-                case "partial":
-                case "PARTIAL":
-                case "Partial":
-                    return PARTIAL;
+                case "defect":
+                case "Defect":
+                case "DEFECT":
+                    return DEFECT;
                 case "none":
                 case "NONE":
                 case "None":
@@ -96,7 +91,7 @@ public class Clothes {
     public enum CATEGORY {
         TOP("상의"),
         BOTTOM("하의"),
-        BOTH("상의 하의 둘 다 맡김");
+        ETC("기타");
 
         private String korean;
 
@@ -120,11 +115,11 @@ public class Clothes {
                 case "Bottom":
                 case "하의":
                     return BOTTOM;
-                case "both":
-                case "BOTH":
-                case "Both":
-                case "상하의":
-                    return BOTH;
+                case "ETC":
+                case "Etc":
+                case "etc":
+                case "기타":
+                    return ETC;
                 default:
                     throw new IllegalAccessException("잘못됨");
             }

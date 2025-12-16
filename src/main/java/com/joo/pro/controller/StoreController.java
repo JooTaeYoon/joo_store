@@ -41,15 +41,6 @@ public class StoreController {
         return ResponseEntity.ok(customer);
     }
 
-    /**
-     * 손님 정보 가져오기
-     * @return
-     */
-    @GetMapping("/get/customer")
-    @Operation(summary = "손님 정보 가져오기", description = "손님 정보를 가져옵니다.")
-    public ResponseEntity<?> getCustomer() {
-        return ResponseEntity.ok("hello");
-    }
 
     /**
      * 손님 정보 수정
@@ -63,6 +54,18 @@ public class StoreController {
     public ResponseEntity<CustomerDtoResponse> update(@RequestBody CustomerDtoRequest request, @PathVariable("id") Long id) {
         log.info("update 호출됨");
         return ResponseEntity.ok(customerService.updateCustomer(id, request));
+    }
+
+    /**
+     * 손님 한명의 정보 가져오기
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("/{id}/get")
+    @Operation(summary = "손님 정보 가져오기", description = "손님 정보 가져오기")
+    public ResponseEntity<CustomerDtoResponse> getCustomerInfo(@PathVariable("id") Long id) {
+        return ResponseEntity.ok(customerService.getCustomerInfo(id));
     }
 
     /**
@@ -83,20 +86,21 @@ public class StoreController {
      * @return
      */
     @GetMapping("/customer-one")
-    @Operation(summary = "한명 손님 정보 가져오기", description = "한명 손님 정보를 가져옵니다.")
+    @Operation(summary = "검색해서 한명 손님 정보 가져오기", description = "한명 손님 정보를 가져옵니다.")
     public ResponseEntity<List<CustomerDtoResponse>> getCustomer(@RequestBody CustomerDtoRequest request) {
         return ResponseEntity.ok(customerService.getCustomer(request));
     }
 
     /**
      * 손님 옷 저장
-     * @param id 손님 id
+     *
+     * @param id      손님 id
      * @param request 옷 정보
      * @return
      */
     @PostMapping("/{id}/save/clothes")
     @Operation(summary = "손님 옷 저장", description = "손님이 맡긴 옷 정보를 저장합니다.")
-    public ResponseEntity<?> saveClothesToCustomer(@PathVariable("id") Long id, @RequestBody OrderRequest request) {
+    public ResponseEntity<?> saveClothesToCustomer(@PathVariable("id") Long id, @RequestBody List<OrderRequest> request) {
         return ResponseEntity.ok(clothesService.saveClothes(id, request));
     }
 
@@ -116,6 +120,7 @@ public class StoreController {
 
     /**
      * 손님 옷 정보 가져오기
+     *
      * @param id 손님 id
      * @return 손님이 맡긴 옷 정보
      */
