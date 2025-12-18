@@ -107,6 +107,10 @@
             <label :for="'comment-' + index">특이사항/요청사항:</label>
             <input type="text" v-model="item.comment" />
           </div>
+          <div class="form-group">
+            <label :for="'comment-' + index">가격:</label>
+            <input type="text" v-model="item.price" />
+          </div>
           <hr v-if="index < clothesList.length - 1" class="item-separator" />
         </div>
 
@@ -183,6 +187,8 @@ const clothesList = ref([
     serviceType: 'DRY_CLEAN',
     status: 'NONE',
     comment: '',
+    price: '',
+    length: 0,
   },
 ]);
 
