@@ -51,6 +51,9 @@ public class Clothes {
     @Enumerated(EnumType.STRING)
     private STATUS status;
 
+    @Column
+    private String price;
+
     public void setStatus(STATUS status) {
         this.status = status;
     }

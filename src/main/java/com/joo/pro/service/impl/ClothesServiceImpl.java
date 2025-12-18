@@ -39,7 +39,7 @@ public class ClothesServiceImpl implements ClothesService {
                 .orElseThrow(() -> new RuntimeException("해당 고객이 존재하지 않습니다."));
 
         Order order = Order.builder()
-//                .count(request.getCount())
+//                .count(request.get(0).getCount())
                 .customer(customer)
 //                .clothes(request.getClothesList())
                 .build();
@@ -52,6 +52,7 @@ public class ClothesServiceImpl implements ClothesService {
                     .category(Clothes.CATEGORY.valueOf(dto.getCategory().toUpperCase()))
                     .comment(dto.getComment())
                     .status(Clothes.STATUS.valueOf(dto.getStatus().toUpperCase()))
+                    .price(dto.getPrice())
                     .orderId(order)
                     .build();
             order.getClothes().add(clothes);

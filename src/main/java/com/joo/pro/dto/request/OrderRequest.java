@@ -22,5 +22,8 @@ public class OrderRequest {
     private String category;
     private String serviceType;
     private String status;
+    private String price;
+
+    private int count;
 
 }
