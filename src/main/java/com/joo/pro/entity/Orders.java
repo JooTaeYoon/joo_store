@@ -15,7 +15,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Order {
+public class Orders {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,7 +31,7 @@ public class Order {
     private Integer count;
 
     //    손님이 맡긴 옷들의 정보들
-    @OneToMany(mappedBy = "orderId", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<Clothes> clothes = new ArrayList<>();
 
@@ -39,10 +39,4 @@ public class Order {
     @CreationTimestamp
     private LocalDateTime createdAt;
 
-    @Version
-    private Integer version;
-
-    public void increaseVersion() {
-        this.version = this.version + 1;
-    }
 }

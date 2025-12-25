@@ -7,6 +7,7 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 
 @Entity
 @Table(name = "clothes")
@@ -29,9 +30,9 @@ public class Clothes {
     private LocalDateTime createdAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "orderId")
+    @JoinColumn(name = "order_id")
     @JsonIgnore
-    private Order orderId;
+    private Orders order;
 
     //    상의인지 하의인지
     @Column(length = 300)
@@ -52,6 +53,10 @@ public class Clothes {
     private STATUS status;
 
     @Column
+    @Enumerated(EnumType.STRING)
+    private PICKUP pickup;
+
+    @Column
     private String price;
 
     public void setStatus(STATUS status) {
@@ -60,8 +65,8 @@ public class Clothes {
 
     @Getter
     public enum STATUS {
-        DEFECT("이상 있음"),   // 모두 찾아감
-        NONE("이상 없음");          // 아직 하나도 안 찾아감
+        DEFECT("O"),   // 모두 찾아감
+        NONE("X");          // 아직 하나도 안 찾아감
 
         private String korean;
 
@@ -86,6 +91,18 @@ public class Clothes {
                 default:
                     throw new IllegalAccessException("잘못됨");
             }
+        }
+    }
+
+    @Getter
+    public enum PICKUP {
+        YES("O"),
+        NO("X");
+
+        private String korean;
+
+        PICKUP(String korean) {
+            this.korean = korean;
         }
     }
 
@@ -134,7 +151,8 @@ public class Clothes {
         WASH("세탁"),
         DRY_CLEAN("드라이"),
         IRON("다림질"),
-        ALTERATION("수선");
+        ALTERATION("수선"),
+        OTHER("기타");
 
         private String koreanName;
 
@@ -143,30 +161,24 @@ public class Clothes {
         }
 
         @JsonCreator
-        public static SERVICE_TYPE from(String value) throws IllegalAccessException {
-            if (value == null) {
-                throw new IllegalAccessException("카테고리 값이 비었습니다");
+        public static SERVICE_TYPE from(String value) {
+            if (value == null || value.trim().isEmpty()) {
+                return OTHER; // 값이 없으면 에러 대신 기본값으로 처리 (선택 사항)
             }
-            switch (value.toLowerCase()) {
-                case "wash":
-                case "WASH":
-                case "Wash":
-                    return WASH;
-                case "dry_clean":
-                case "DRY_CLEAN":
-                case "Dry_Clean":
-                    return DRY_CLEAN;
-                case "iron":
-                case "IRON":
-                case "Iron":
-                    return IRON;
-                case "alteration":
-                case "ALTERATION":
-                case "Alteration":
-                    return ALTERATION;
-                default:
-                    throw new IllegalAccessException("잘못됨");
+
+            for (SERVICE_TYPE type : SERVICE_TYPE.values()) {
+                // 1. 영어 이름 (WASH, OTHER 등) 비교
+                if (type.name().equalsIgnoreCase(value)) {
+                    return type;
+                }
+                // 2. 한글 이름 (세탁, 기타 등) 비교
+                if (type.getKoreanName().equals(value)) {
+                    return type;
+                }
             }
+            // 여기까지 왔다면 진짜 없는 값임
+            System.out.println("입력된 잘못된 값: " + value); // 로그로 범인을 잡습니다.
+            return OTHER; // 에러를 던지는 대신 '기타'로 보내주면 서비스가 멈추지 않습니다.
         }
     }
 }
