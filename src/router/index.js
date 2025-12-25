@@ -7,6 +7,7 @@ import CustomerRegistrationForm from '@/view/CustomerRegistrationForm.vue';
 import CustomerList from '@/view/CustomerList.vue';
 import CustomerDetail from '@/view/CustomerDetail.vue';
 import CustomerClothesHistory from '@/view/CustomerClothesHistory.vue';
+import CustomerSearch from '../view/CustomerSearch.vue';
 
 // 2. 경로(Routes) 정의
 const routes = [
@@ -42,6 +43,14 @@ const routes = [
     path: '/customers/:id/history',
     name: 'ClothesHistory',
     component: CustomerClothesHistory,
+    props: true,
+    meta: { title: '세탁물 이력' },
+  },
+  {
+    // 주문/옷 이력 조회 페이지 (필요하다면 별도 경로로 분리)
+    path: '/customers/search',
+    name: 'CustomerSearch',
+    component: CustomerSearch,
     props: true,
     meta: { title: '세탁물 이력' },
   },

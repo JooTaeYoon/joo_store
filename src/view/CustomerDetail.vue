@@ -105,11 +105,21 @@
 
           <div class="form-group">
             <label :for="'comment-' + index">특이사항/요청사항:</label>
-            <input type="text" v-model="item.comment" />
+            <input
+              type="text"
+              v-model="item.comment"
+              placeholder="특이사항이 있을 시, 입력 하세요."
+            />
           </div>
           <div class="form-group">
             <label :for="'comment-' + index">가격:</label>
-            <input type="text" v-model="item.price" />
+            <input
+              type="number"
+              v-model="item.price"
+              required
+              placeholder="숫자만 입력하세요."
+              @input="validatePrice(index)"
+            />
           </div>
           <hr v-if="index < clothesList.length - 1" class="item-separator" />
         </div>
@@ -200,8 +210,10 @@ const addClothesForm = () => {
     clothesType: '',
     category: '',
     serviceType: 'DRY_CLEAN',
-    status: 'PENDING',
+    status: 'NONE',
     comment: '',
+    price: '',
+    length: 0,
   });
   totalClothesCount.value++;
 };
@@ -214,8 +226,24 @@ const removeClothesForm = (index) => {
   totalClothesCount.value--;
 };
 
+const validatePrice = (index) => {
+  const price = clothesList.value[index].price;
+  // 음수 입력 방지 및 숫자 외 문자 제거 (number 타입이라도 e, -, . 등 방지)
+  if (price < 0) {
+    clothesList.value[index].price = 0;
+  }
+};
+
 // 3. 옷 접수 및 저장 (API 호출 수정)
 const saveClothes = async () => {
+  for (let i = 0; i < clothesList.value.length; i++) {
+    const item = clothesList.value[i];
+    if (item.price === '' || item.price === null || isNaN(item.price)) {
+      alert(`${i + 1}번째 품목의 가격을 정확히 입력해주세요.`);
+      return; // 함수 실행 중단
+    }
+  }
+
   isSavingClothes.value = true;
   saveMessage.value = '';
   isSaveSuccess.value = false;
@@ -243,8 +271,10 @@ const saveClothes = async () => {
         clothesType: '',
         category: '',
         serviceType: 'DRY_CLEAN',
-        status: 'PENDING',
+        status: 'NONE',
         comment: '',
+        price: '',
+        length: 0,
       },
     ];
     totalClothesCount.value = 1;
@@ -261,7 +291,7 @@ const fetchCustomer = async () => {
   isLoading.value = true;
   try {
     // API 주소 수정: /api/store/{id}/get
-    const response = await axios.get(`${API_BASE}/${props.id}/get`);
+    const response = await axios.get(`${API_BASE}/${props.id}/get/clothes`, {});
     customer.value = response.data;
   } catch (error) {
     console.error('Fetch one customer error:', error);
