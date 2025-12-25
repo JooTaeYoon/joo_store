@@ -1,7 +1,10 @@
 package com.joo.pro.service;
 
 import com.joo.pro.dto.request.CustomerDtoRequest;
+import com.joo.pro.dto.response.ClothesDtoResponse;
 import com.joo.pro.dto.response.CustomerDtoResponse;
+import com.joo.pro.dto.response.SearchCustomerResponse;
+import com.joo.pro.entity.Customer;
 
 import java.util.List;
 
@@ -13,5 +16,10 @@ public interface CustomerService {
 
     List<CustomerDtoResponse> readAllCustomers();
 
-    CustomerDtoResponse getCustomer(CustomerDtoRequest request);
+    List<CustomerDtoResponse> getCustomer(CustomerDtoRequest request);
+
+    SearchCustomerResponse getCustomerInfo(Long id);
+
+    List<CustomerDtoResponse> findByOrderCustomerId(String request) throws IllegalAccessException;
+
 }

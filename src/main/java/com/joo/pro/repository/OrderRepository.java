@@ -1,7 +1,12 @@
 package com.joo.pro.repository;
 
-import com.joo.pro.entity.Order;
+import com.joo.pro.entity.Orders;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface OrderRepository extends JpaRepository<Order, Long> {
+import java.util.Optional;
+
+public interface OrderRepository extends JpaRepository<Orders, Long> {
+
+    Optional<Orders> findByCustomerId(Long customerId);
+
 }

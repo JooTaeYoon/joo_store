@@ -7,6 +7,7 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 
 @Entity
 @Table(name = "clothes")
@@ -29,9 +30,9 @@ public class Clothes {
     private LocalDateTime createdAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "orderId")
+    @JoinColumn(name = "order_id")
     @JsonIgnore
-    private Order orderId;
+    private Orders order;
 
     //    상의인지 하의인지
     @Column(length = 300)
@@ -43,19 +44,29 @@ public class Clothes {
     private String comment;
 
     //    드라이, 세탁, 다림질 등 어떤 서비스를 요청했는지 기록
-    @Column
+    @Column(columnDefinition = "VARCHAR(100)")
     @Enumerated(EnumType.STRING)
     private SERVICE_TYPE serviceType;
 
-    @Column
+    @Column(columnDefinition = "VARCHAR(100)")
     @Enumerated(EnumType.STRING)
     private STATUS status;
 
+    @Column
+    @Enumerated(EnumType.STRING)
+    private PICKUP pickup;
+
+    @Column
+    private String price;
+
+    public void setStatus(STATUS status) {
+        this.status = status;
+    }
+
     @Getter
     public enum STATUS {
-        ALL_PICKED("모두 찾아감"),   // 모두 찾아감
-        PARTIAL("일부 찾아감"),      // 일부 찾아감
-        NONE("하나도 안 찾아감");          // 아직 하나도 안 찾아감
+        DEFECT("O"),   // 모두 찾아감
+        NONE("X");          // 아직 하나도 안 찾아감
 
         private String korean;
 
@@ -69,14 +80,10 @@ public class Clothes {
                 throw new IllegalAccessException("상태 값이 비었습니다");
             }
             switch (value.toLowerCase()) {
-                case "all_picked":
-                case "ALL_PICKED":
-                case "All_Picked":
-                    return ALL_PICKED;
-                case "partial":
-                case "PARTIAL":
-                case "Partial":
-                    return PARTIAL;
+                case "defect":
+                case "Defect":
+                case "DEFECT":
+                    return DEFECT;
                 case "none":
                 case "NONE":
                 case "None":
@@ -87,12 +94,24 @@ public class Clothes {
         }
     }
 
+    @Getter
+    public enum PICKUP {
+        YES("O"),
+        NO("X");
+
+        private String korean;
+
+        PICKUP(String korean) {
+            this.korean = korean;
+        }
+    }
+
 
     @Getter
     public enum CATEGORY {
         TOP("상의"),
         BOTTOM("하의"),
-        BOTH("상의 하의 둘 다 맡김");
+        ETC("기타");
 
         private String korean;
 
@@ -116,11 +135,11 @@ public class Clothes {
                 case "Bottom":
                 case "하의":
                     return BOTTOM;
-                case "both":
-                case "BOTH":
-                case "Both":
-                case "상하의":
-                    return BOTH;
+                case "ETC":
+                case "Etc":
+                case "etc":
+                case "기타":
+                    return ETC;
                 default:
                     throw new IllegalAccessException("잘못됨");
             }
@@ -132,7 +151,8 @@ public class Clothes {
         WASH("세탁"),
         DRY_CLEAN("드라이"),
         IRON("다림질"),
-        ALTERATION("수선");
+        ALTERATION("수선"),
+        OTHER("기타");
 
         private String koreanName;
 
@@ -141,30 +161,24 @@ public class Clothes {
         }
 
         @JsonCreator
-        public static SERVICE_TYPE from(String value) throws IllegalAccessException {
-            if (value == null) {
-                throw new IllegalAccessException("카테고리 값이 비었습니다");
+        public static SERVICE_TYPE from(String value) {
+            if (value == null || value.trim().isEmpty()) {
+                return OTHER; // 값이 없으면 에러 대신 기본값으로 처리 (선택 사항)
             }
-            switch (value.toLowerCase()) {
-                case "wash":
-                case "WASH":
-                case "Wash":
-                    return WASH;
-                case "dry_clean":
-                case "DRY_CLEAN":
-                case "Dry_Clean":
-                    return DRY_CLEAN;
-                case "iron":
-                case "IRON":
-                case "Iron":
-                    return IRON;
-                case "alteration":
-                case "ALTERATION":
-                case "Alteration":
-                    return ALTERATION;
-                default:
-                    throw new IllegalAccessException("잘못됨");
+
+            for (SERVICE_TYPE type : SERVICE_TYPE.values()) {
+                // 1. 영어 이름 (WASH, OTHER 등) 비교
+                if (type.name().equalsIgnoreCase(value)) {
+                    return type;
+                }
+                // 2. 한글 이름 (세탁, 기타 등) 비교
+                if (type.getKoreanName().equals(value)) {
+                    return type;
+                }
             }
+            // 여기까지 왔다면 진짜 없는 값임
+            System.out.println("입력된 잘못된 값: " + value); // 로그로 범인을 잡습니다.
+            return OTHER; // 에러를 던지는 대신 '기타'로 보내주면 서비스가 멈추지 않습니다.
         }
     }
 }
