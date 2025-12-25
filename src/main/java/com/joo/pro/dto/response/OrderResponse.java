@@ -2,7 +2,7 @@ package com.joo.pro.dto.response;
 
 import com.joo.pro.entity.Clothes;
 import com.joo.pro.entity.Customer;
-import com.joo.pro.entity.Order;
+import com.joo.pro.entity.Orders;
 import lombok.*;
 
 import java.util.ArrayList;
@@ -26,7 +26,7 @@ public class OrderResponse {
     //    손님이 맡긴 옷들의 정보들
     private List<Clothes> clothes = new ArrayList<>();
 
-   public static OrderResponse fromEntity(Order order){
+   public static OrderResponse fromEntity(Orders order){
        return OrderResponse.builder()
                .id(order.getId())
 //               .customer(order.getCustomer())

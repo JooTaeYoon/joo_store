@@ -9,9 +9,9 @@ import java.util.List;
 
 public interface ClothesService {
 
-    OrderResponse saveClothes(Long id, List<OrderRequest> clothesType);
+    OrderResponse saveClothes(Long id, OrderRequest clothesType);
 
-    List<ClothesDtoResponse> getClothes(Long id, PickupDtoRequest clothesIdList);
+    List<ClothesDtoResponse> getClothes(Long id);
 
 
 }

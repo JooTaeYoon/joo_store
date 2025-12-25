@@ -37,6 +37,6 @@ public class Customer {
     private LocalDateTime createdAt;
 
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Order> clothesOrders = new ArrayList<>();
+    private List<Orders> clothesOrders = new ArrayList<>();
 
 }

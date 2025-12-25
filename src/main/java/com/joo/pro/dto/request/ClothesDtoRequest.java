@@ -20,10 +20,14 @@ public class ClothesDtoRequest {
 
     private String comment;
 
+    private String price;
+
     private Clothes.SERVICE_TYPE serviceType;
 
     private Clothes.CATEGORY category;
 
     private Clothes.STATUS status;
+
+    private Clothes.PICKUP pickup;
 
 }

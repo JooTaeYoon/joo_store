@@ -5,6 +5,8 @@ import com.joo.pro.dto.request.OrderRequest;
 import com.joo.pro.dto.request.PickupDtoRequest;
 import com.joo.pro.dto.response.ClothesDtoResponse;
 import com.joo.pro.dto.response.CustomerDtoResponse;
+import com.joo.pro.dto.response.SearchCustomerResponse;
+import com.joo.pro.entity.Customer;
 import com.joo.pro.service.ClothesService;
 import com.joo.pro.service.CustomerService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -62,11 +64,26 @@ public class StoreController {
      * @param id
      * @return
      */
-    @GetMapping("/{id}/get")
+    @GetMapping("/customer/{id}/get")
     @Operation(summary = "손님 정보 가져오기", description = "손님 정보 가져오기")
-    public ResponseEntity<CustomerDtoResponse> getCustomerInfo(@PathVariable("id") Long id) {
+    public ResponseEntity<?> getCustomerInfo(@PathVariable("id") Long id) {
         return ResponseEntity.ok(customerService.getCustomerInfo(id));
     }
+
+    /**
+     * 손님 이름 및 번호(뒷자리 4자리)로 검색
+     *
+     * @param request
+     * @return
+     */
+    @GetMapping("/search")
+    public ResponseEntity<List<CustomerDtoResponse>> searchCustomers(@RequestParam("query") String query) throws IllegalAccessException {
+        log.info("request = {}", query);
+        List<CustomerDtoResponse> byOrderCustomerId = customerService.findByOrderCustomerId(query);
+        log.info("byOrderCustomerId = {}", byOrderCustomerId);
+        return ResponseEntity.ok(byOrderCustomerId);
+    }
+
 
     /**
      * 모든 손님 정보 가져오기
@@ -100,7 +117,7 @@ public class StoreController {
      */
     @PostMapping("/{id}/save/clothes")
     @Operation(summary = "손님 옷 저장", description = "손님이 맡긴 옷 정보를 저장합니다.")
-    public ResponseEntity<?> saveClothesToCustomer(@PathVariable("id") Long id, @RequestBody List<OrderRequest> request) {
+    public ResponseEntity<?> saveClothesToCustomer(@PathVariable("id") Long id, @RequestBody OrderRequest request) {
         return ResponseEntity.ok(clothesService.saveClothes(id, request));
     }
 
@@ -111,22 +128,11 @@ public class StoreController {
      * @param request 옷 정보
      * @return
      */
-    @PostMapping("/{id}/get/clothes")
+    @GetMapping("/customer/{id}/clothes")
     @ApiResponse(description = "옷 찾기")
     @Operation(summary = "옷 찾기", description = "손님이 맡긴 옷 정보를 가져옵니다.")
-    public ResponseEntity<List<ClothesDtoResponse>> getClothesFromCustomer(@PathVariable("id") Long id, @RequestBody PickupDtoRequest clothesId) {
-        return ResponseEntity.ok(clothesService.getClothes(id, clothesId));
-    }
-
-    /**
-     * 손님 옷 정보 가져오기
-     *
-     * @param id 손님 id
-     * @return 손님이 맡긴 옷 정보
-     */
-    @GetMapping("/customer/{id}/clothes")
-    @Operation(summary = "손님 옷 정보 가져오기", description = "손님이 맡긴 옷 정보를 가져옵니다.")
-    public ResponseEntity<List<ClothesDtoResponse>> getCustomerClothes(@PathVariable("id") Long id) {
-        return ResponseEntity.ok(customerService.getCustomerClothes(id));
+    public ResponseEntity<List<ClothesDtoResponse>> getClothesFromCustomer(@PathVariable("id") Long id) {
+        log.info("getClothesFromCustomer 호출됨");
+        return ResponseEntity.ok(clothesService.getClothes(id));
     }
 }

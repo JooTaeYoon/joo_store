@@ -17,13 +17,16 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OrderRequest {
 
-    private String clothesType;
-    private String comment;
-    private String category;
-    private String serviceType;
-    private String status;
-    private String price;
+    private Long customerId;
+    private List<ClothesDtoRequest> clothesList;
 
-    private int count;
+//    private String clothesType;
+//    private String comment;
+//    private String category;
+//    private String serviceType;
+//    private String status;
+//    private String price;
+//
+//    private int count;
 
 }
