@@ -3,6 +3,7 @@
     <nav class="main-nav">
       <router-link to="/customers">📋 손님 목록</router-link>
       <router-link to="/register">📝 손님 등록</router-link>
+      <router-link to="/customers/search">손님 검색</router-link>
     </nav>
 
     <main>
