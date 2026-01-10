@@ -121,28 +121,23 @@ public class Clothes {
 
         @JsonCreator
         public static CATEGORY from(String value) throws IllegalAccessException {
-            if (value == null) {
-                throw new IllegalAccessException("카테고리 값이 비었습니다");
+            if(value == null || value.trim().isEmpty()){
+                return ETC; // 값이 없으면 에러 대신 기본값으로 처리 (선택 사항)
             }
-            switch (value.toLowerCase()) {
-                case "top":
-                case "TOP":
-                case "Top":
-                case "상의":
-                    return TOP;
-                case "bottom":
-                case "BOTTOM":
-                case "Bottom":
-                case "하의":
-                    return BOTTOM;
-                case "ETC":
-                case "Etc":
-                case "etc":
-                case "기타":
-                    return ETC;
-                default:
-                    throw new IllegalAccessException("잘못됨");
+
+            for (CATEGORY type : CATEGORY.values()) {
+                // 1. 영어 이름 (TOP, BOTTOM 등) 비교
+                if (type.name().equalsIgnoreCase(value)) {
+                    return type;
+                }
+                // 2. 한글 이름 (상의, 하의 등) 비교
+                if (type.getKorean().equals(value)) {
+                    return type;
+                }
             }
+            // 여기까지 왔다면 진짜 없는 값임
+            System.out.println("입력된 잘못된 값: " + value); // 로그로 범인을 잡습니다.
+            return ETC; // 에러를 던지는 대신 기타
         }
     }
 
