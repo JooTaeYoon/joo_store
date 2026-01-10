@@ -71,6 +71,21 @@ public class StoreController {
     }
 
     /**
+     * 손님 이름 및 번호(뒷자리 4자리)로 검색
+     *
+     * @param request
+     * @return
+     */
+    @GetMapping("/search")
+    public ResponseEntity<List<CustomerDtoResponse>> searchCustomers(@RequestParam("query") String query) throws IllegalAccessException {
+        log.info("request = {}", query);
+        List<CustomerDtoResponse> byOrderCustomerId = customerService.findByOrderCustomerId(query);
+        log.info("byOrderCustomerId = {}", byOrderCustomerId);
+        return ResponseEntity.ok(byOrderCustomerId);
+    }
+
+
+    /**
      * 모든 손님 정보 가져오기
      *
      * @return
