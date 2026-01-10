@@ -4,6 +4,8 @@ package com.joo.pro.dto.response;
 import com.joo.pro.entity.Customer;
 import lombok.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,10 +23,13 @@ public class CustomerDtoResponse {
 
     private Long id;
 
+    private LocalDateTime createdAt;
+
     public static CustomerDtoResponse fromEntity(Customer customer) {
         return CustomerDtoResponse.builder()
                 .name(customer.getName())
                 .phoneNumber(customer.getPhoneNumber())
+                .createdAt(customer.getCreatedAt())
                 .id(customer.getId())
                 .build();
     }

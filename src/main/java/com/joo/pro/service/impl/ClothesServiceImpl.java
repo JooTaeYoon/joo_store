@@ -51,12 +51,12 @@ public class ClothesServiceImpl implements ClothesService {
             Clothes clothes = Clothes.builder()
                     .clothesType(dto.getClothesType())
                     .serviceType(serviceType)
-                    .category(Clothes.CATEGORY.valueOf(String.valueOf(dto.getCategory())))
+//                    .category(Clothes.CATEGORY.valueOf(String.valueOf(dto.getCategory())))
                     .comment(dto.getComment())
-                    .status(Clothes.STATUS.valueOf(String.valueOf(dto.getStatus())))
+//                    .status(Clothes.STATUS.valueOf(String.valueOf(dto.getStatus())))
                     .price(dto.getPrice())
                     .order(order)
-                    .pickup(dto.getPickup())
+//                    .pickup(dto.getPickup())
                     .build();
             order.getClothes().add(clothes);
             clothesRepository.save(clothes);
