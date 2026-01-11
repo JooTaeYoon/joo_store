@@ -9,4 +9,5 @@ public interface OrderRepository extends JpaRepository<Orders, Long> {
 
     Optional<Orders> findByCustomerId(Long customerId);
 
+    void deleteByCustomerId(Long id);
 }

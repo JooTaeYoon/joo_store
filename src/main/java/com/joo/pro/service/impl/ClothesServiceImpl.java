@@ -96,39 +96,44 @@ public class ClothesServiceImpl implements ClothesService {
      */
     @Override
     @Transactional
-    public OrderResponse saveUpdatedHistory(Long id, OrderRequest request) {
-        //        고객 찾기
-        Customer customer = customerRepository.findById(id)
+    public OrderResponse saveUpdatedHistory(Long customerId, OrderRequest request) {
+        // 1. 고객 존재 여부 확인
+        Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new RuntimeException("해당 고객이 존재하지 않습니다."));
 
-        log.info("customer = {}", customer);
+        // 2. 기존 해당 고객의 '모든' 주문 기록 삭제 (연관된 옷들도 Cascade에 의해 삭제되도록 설정 필요)
+        // 만약 기존 주문을 유지하지 않고 화면의 데이터로 덮어쓰는 기획이라면 삭제가 먼저입니다.
+        orderRepository.deleteByCustomerId(customerId);
+        log.info("customerId: {}", customerId);
 
+        // 3. 새로운 주문(Orders) 객체 생성
         Orders order = Orders.builder()
                 .count(request.getClothesList().size())
                 .customer(customer)
-//                .clothes(request.getClothesList())
+                .clothes(new ArrayList<>()) // 초기화
                 .build();
-        log.info("order = {}", order);
 
+        // 4. DTO 리스트를 엔티티 리스트로 변환하여 주문에 추가
         for (ClothesDtoRequest dto : request.getClothesList()) {
-            Clothes.SERVICE_TYPE serviceType = Clothes.SERVICE_TYPE.valueOf(String.valueOf(dto.getServiceType()));
             Clothes clothes = Clothes.builder()
                     .clothesType(dto.getClothesType())
-                    .serviceType(serviceType)
-//                    .category(Clothes.CATEGORY.valueOf(String.valueOf(dto.getCategory())))
+                    .serviceType(dto.getServiceType()) // Enum 타입 체크 필요
                     .comment(dto.getComment())
-//                    .status(Clothes.STATUS.valueOf(String.valueOf(dto.getStatus())))
                     .price(dto.getPrice())
-                    .order(order)
-//                    .pickup(dto.getPickup())
+                    .status(dto.getStatus())
+                    .pickup(dto.getPickup())
+                    .order(order) // 연관관계 설정
                     .build();
+
             order.getClothes().add(clothes);
-            clothesRepository.deleteById(id);
-            clothesRepository.save(clothes);
         }
-        orderRepository.deleteById(id);
-        orderRepository.save(order);
-        return OrderResponse.fromEntity(order);
+
+        // 5. 저장 (Orders를 저장하면 연관된 Clothes들도 함께 저장됨 - CascadeType.ALL 설정 시)
+        Orders savedOrder = orderRepository.save(order);
+
+        log.info("새로운 주문 저장 완료: ID = {}, 옷 수량 = {}", savedOrder.getId(), savedOrder.getClothes().size());
+
+        return OrderResponse.fromEntity(savedOrder);
     }
 
 }

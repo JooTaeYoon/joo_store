@@ -95,7 +95,7 @@ public class StoreController {
      */
     @PutMapping("/{id}/update")
     public ResponseEntity<?> saveUpdatedHistory(@PathVariable("id") Long id, @RequestBody OrderRequest request) {
-        log.info("updateClothesStatus: {}", request);
+        log.info("옷 정보 수정: {}", request);
         clothesService.saveUpdatedHistory(id, request);
         return ResponseEntity.ok().build();
     }
