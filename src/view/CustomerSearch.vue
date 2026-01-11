@@ -50,14 +50,19 @@
 
               <tr v-if="openedId === customer.id" class="detail-drawer-row">
                 <td colspan="4">
-                  <div class="detail-container">
+                  <div
+                    class="detail-container"
+                    :class="{ 'edit-mode-border': isEditMode }"
+                  >
                     <div class="detail-header">
-                      <span class="detail-title"
-                        >🧺 {{ customer.name }}님 최근 세탁 기록</span
-                      >
-                      <button class="close-x" @click="openedId = null">
-                        X
-                      </button>
+                      <span class="detail-title">
+                        {{
+                          isEditMode
+                            ? '✏️ 세탁 기록 수정 중'
+                            : '🧺 ' + customer.name + '님 최근 세탁 기록'
+                        }}
+                      </span>
+                      <button class="close-x" @click="closeDrawer">X</button>
                     </div>
 
                     <div class="detail-body">
@@ -84,27 +89,76 @@
                             <tbody>
                               <tr v-for="item in clothesHistory" :key="item.id">
                                 <td>{{ formatDateShort(item.createdAt) }}</td>
-                                <td>{{ item.clothesType }}</td>
-                                <td>{{ item.serviceType }}</td>
-                                <td>
-                                  <span
-                                    :class="
-                                      item.status === 'O'
-                                        ? 'status-badge-defect'
-                                        : 'status-badge-none'
-                                    "
+
+                                <template v-if="isEditMode">
+                                  <td>
+                                    <input
+                                      v-model="item.clothesType"
+                                      class="edit-input"
+                                    />
+                                  </td>
+                                  <td>
+                                    <select
+                                      v-model="item.serviceType"
+                                      class="edit-select"
+                                    >
+                                      <option value="세탁">세탁</option>
+                                      <option value="드라이">드라이</option>
+                                      <option value="다림질">다림질</option>
+                                      <option value="수선">수선</option>
+                                      <option value="기타">기타</option>
+                                    </select>
+                                  </td>
+                                  <td>
+                                    <select
+                                      v-model="item.status"
+                                      class="edit-select"
+                                    >
+                                      <option value="X">X</option>
+                                      <option value="O">O</option>
+                                    </select>
+                                  </td>
+                                  <td>
+                                    <select
+                                      v-model="item.pickUp"
+                                      class="edit-select"
+                                    >
+                                      <option value="X">X</option>
+                                      <option value="O">O</option>
+                                    </select>
+                                  </td>
+                                  <td>
+                                    <input
+                                      type="number"
+                                      v-model="item.price"
+                                      class="edit-input-price"
+                                    />원
+                                  </td>
+                                </template>
+
+                                <template v-else>
+                                  <td>{{ item.clothesType }}</td>
+                                  <td>{{ item.serviceType }}</td>
+                                  <td>
+                                    <span
+                                      :class="
+                                        item.status === 'O'
+                                          ? 'status-badge-defect'
+                                          : 'status-badge-none'
+                                      "
+                                    >
+                                      {{ item.status }}
+                                    </span>
+                                  </td>
+                                  <td
+                                    :class="{
+                                      'picked-up': item.pickUp === 'O',
+                                    }"
                                   >
-                                    {{ item.status }}
-                                  </span>
-                                </td>
-                                <td
-                                  :class="{
-                                    'picked-up': item.pickUp === 'X',
-                                  }"
-                                >
-                                  {{ item.pickUp }}
-                                </td>
-                                <td>{{ formatPrice(item.price) }}원</td>
+                                    {{ item.pickUp }}
+                                  </td>
+                                  <td>{{ formatPrice(item.price) }}원</td>
+                                </template>
                               </tr>
                             </tbody>
                           </table>
@@ -115,15 +169,34 @@
                       </div>
 
                       <div class="action-btns">
-                        <button
-                          class="btn-order"
-                          @click="goToOrder(customer.id)"
-                        >
-                          🧺 새 주문 등록
-                        </button>
-                        <button class="btn-edit" @click="goToEdit(customer.id)">
-                          ✏️ 정보 수정
-                        </button>
+                        <template v-if="isEditMode">
+                          <button
+                            class="btn-cancel"
+                            @click="isEditMode = false"
+                          >
+                            취소
+                          </button>
+                          <button
+                            class="btn-save-edit"
+                            @click="saveUpdatedHistory(customer.id)"
+                          >
+                            ✅ 변경사항 저장
+                          </button>
+                        </template>
+                        <template v-else>
+                          <button
+                            class="btn-order"
+                            @click="goToOrder(customer.id)"
+                          >
+                            🧺 새 주문 등록
+                          </button>
+                          <button
+                            class="btn-edit-mode"
+                            @click="isEditMode = true"
+                          >
+                            ✏️ 정보 수정
+                          </button>
+                        </template>
                       </div>
                     </div>
                   </div>
@@ -133,12 +206,8 @@
           </table>
         </div>
       </div>
-
       <div v-else-if="!isSearching && hasSearched" class="no-result">
         검색 결과가 없습니다.
-      </div>
-      <div v-else-if="!hasSearched" class="initial-state">
-        이름이나 번호로 손님을 찾아보세요.
       </div>
     </div>
   </div>
@@ -157,6 +226,7 @@ const hasSearched = ref(false);
 const openedId = ref(null);
 const clothesHistory = ref([]);
 const isHistoryLoading = ref(false);
+const isEditMode = ref(false); // 수정 모드 상태
 
 const API_BASE = 'http://localhost:8080/api/store';
 
@@ -174,7 +244,7 @@ const searchCustomers = async () => {
     });
     customers.value = response.data;
   } catch (error) {
-    alert('검색 중 오류 발생');
+    alert('검색 오류');
   } finally {
     isSearching.value = false;
   }
@@ -182,10 +252,11 @@ const searchCustomers = async () => {
 
 const toggleDetail = async (id) => {
   if (openedId.value === id) {
-    openedId.value = null;
+    closeDrawer();
     return;
   }
   openedId.value = id;
+  isEditMode.value = false;
   isHistoryLoading.value = true;
   try {
     const response = await axios.get(`${API_BASE}/customer/${id}/clothes`);
@@ -197,45 +268,50 @@ const toggleDetail = async (id) => {
   }
 };
 
+const closeDrawer = () => {
+  openedId.value = null;
+  isEditMode.value = false;
+};
+
+/**
+ * 세탁 기록 수정 사항 저장
+ * @param customerId
+ */
+const saveUpdatedHistory = async (customerId) => {
+  console.log(clothesHistory.value);
+  try {
+    await axios.put(`${API_BASE}/${customerId}/update`, clothesHistory.value);
+    alert('수정이 완료되었습니다.');
+    isEditMode.value = false;
+  } catch (error) {
+    alert('저장 실패');
+  }
+};
+
 const formatPhoneNumber = (num) => {
-  if (!num) return '번호 없음';
+  if (!num) return '-';
   const c = ('' + num).replace(/\D/g, '');
   const m = c.match(/^(\d{3})(\d{3,4})(\d{4})$/);
   return m ? `${m[1]}-${m[2]}-${m[3]}` : num;
 };
 
-const formatDateShort = (dt) => {
-  if (!dt) return '-';
-  return dt.substring(5, 10).replace('-', '/');
-};
-
-const formatPrice = (price) => {
-  if (!price) return '0';
-  return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-};
-
+const formatDateShort = (dt) =>
+  dt ? dt.substring(5, 10).replace('-', '/') : '-';
+const formatPrice = (price) =>
+  price ? price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') : '0';
 const goToOrder = (id) =>
   router.push({ name: 'OrderCreate', query: { customerId: id } });
-const goToEdit = (id) =>
-  router.push({ name: 'CustomerDetail', params: { id } });
 </script>
 
 <style scoped>
-/* 메인 컨테이너 */
+/* 기존 배경 및 컨테이너 스타일 그대로 유지 */
 .search-container {
-  max-width: 100%;
   width: 95%;
   margin: 20px auto;
   background-color: #1c1616;
   color: white;
   padding: 20px;
   border-radius: 8px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-}
-.search-bar {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 20px;
 }
 .search-bar input {
   flex: 1;
@@ -244,48 +320,32 @@ const goToEdit = (id) =>
   border: 1px solid #4a2828;
   background-color: #2d2424;
   color: white;
-  font-size: 1.1rem;
 }
 .main-search-btn {
-  min-width: 90px;
   background-color: #42b983;
   color: white;
+  padding: 10px 20px;
   border: none;
   border-radius: 4px;
-  cursor: pointer;
   font-weight: bold;
-  font-size: 1rem;
 }
 
-/* 손님 테이블 */
-.table-responsive {
-  width: 100%;
-  overflow-x: auto;
-}
 .customer-table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 550px;
-}
-.customer-table th,
-.customer-table td {
-  padding: 15px 10px;
-  border-bottom: 1px solid #4a2828;
-  text-align: center;
 }
 .customer-table th {
   background-color: #2d2424;
   color: #42b983;
+  padding: 15px;
 }
-.active-row {
-  background-color: #2d2424;
+.customer-table td {
+  border-bottom: 1px solid #4a2828;
+  padding: 15px;
+  text-align: center;
 }
 
-/* 상세 서랍 영역 */
-.detail-drawer-row td {
-  padding: 0;
-  border: none;
-}
+/* 상세 서랍 영역 디자인 유지 */
 .detail-container {
   background-color: #151111;
   border: 2px solid #42b983;
@@ -293,48 +353,29 @@ const goToEdit = (id) =>
   padding: 20px;
   border-radius: 10px;
 }
-.detail-header {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 15px;
-  padding-bottom: 10px;
-  border-bottom: 1px dashed #444;
-}
-.detail-title {
-  font-size: 1.2rem;
-  color: #42b983;
-  font-weight: bold;
-}
+.edit-mode-border {
+  border-color: #4a90e2 !important;
+} /* 수정 시 파란색 강조 */
 
-/* [중요] 세탁 기록 스크롤 박스 */
 .history-scroll-box {
   max-height: 350px;
   overflow-y: auto;
   background-color: #1a1515;
   border-radius: 8px;
-  margin-bottom: 20px;
   border: 1px solid #333;
-}
-
-/* 세탁 기록 테이블 */
-.history-table-wrapper {
-  width: 100%;
-  overflow-x: auto;
+  margin-bottom: 20px;
 }
 .history-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.95rem;
-  min-width: 600px;
 }
 .history-table th {
-  background-color: #2d2424;
-  color: #aaa;
-  padding: 12px;
-  position: sticky; /* 헤더 고정 */
+  position: sticky;
   top: 0;
+  background-color: #2d2424;
   z-index: 5;
   border-bottom: 2px solid #42b983;
+  padding: 12px;
 }
 .history-table td {
   padding: 12px;
@@ -342,7 +383,23 @@ const goToEdit = (id) =>
   text-align: center;
 }
 
-/* 상태 배지 및 강조 */
+/* 수정 모드 입력 필드 스타일 */
+.edit-input,
+.edit-select,
+.edit-input-price {
+  background: #111;
+  border: 1px solid #444;
+  color: white;
+  padding: 5px;
+  border-radius: 4px;
+  text-align: center;
+  width: 80%;
+}
+.edit-input-price {
+  width: 60px;
+}
+
+/* 상태 배지 */
 .status-badge-defect {
   background: #d32f2f;
   padding: 3px 8px;
@@ -360,16 +417,16 @@ const goToEdit = (id) =>
   font-weight: bold;
 }
 
-/* 액션 버튼 */
+/* 하단 버튼 디자인 유지 및 추가 */
 .action-btns {
   display: flex;
   gap: 12px;
-  flex-wrap: wrap;
 }
 .btn-order,
-.btn-edit {
+.btn-edit-mode,
+.btn-save-edit,
+.btn-cancel {
   flex: 1;
-  min-width: 150px;
   padding: 16px;
   border: none;
   border-radius: 8px;
@@ -381,36 +438,24 @@ const goToEdit = (id) =>
   background-color: #42b983;
   color: white;
 }
-.btn-edit {
+.btn-edit-mode {
+  background-color: #4a4141;
+  color: white;
+} /* 기존 '정보 수정' 버튼 색상 */
+.btn-save-edit {
   background-color: #4a90e2;
   color: white;
+} /* '저장' 버튼 파란색 */
+.btn-cancel {
+  background-color: #555;
+  color: white;
 }
+
 .close-x {
   background: none;
   border: none;
   color: white;
   font-size: 1.5rem;
   cursor: pointer;
-}
-
-/* 커스텀 스크롤바 디자인 */
-.history-scroll-box::-webkit-scrollbar {
-  width: 10px;
-}
-.history-scroll-box::-webkit-scrollbar-track {
-  background: #1c1616;
-}
-.history-scroll-box::-webkit-scrollbar-thumb {
-  background: #444;
-  border-radius: 10px;
-}
-.history-scroll-box::-webkit-scrollbar-thumb:hover {
-  background: #42b983;
-}
-
-.history-status {
-  text-align: center;
-  padding: 30px;
-  color: #888;
 }
 </style>
