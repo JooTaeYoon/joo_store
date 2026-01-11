@@ -13,5 +13,6 @@ public interface ClothesService {
 
     List<ClothesDtoResponse> getClothes(Long id);
 
+    OrderResponse saveUpdatedHistory(Long id, OrderRequest request);
 
 }

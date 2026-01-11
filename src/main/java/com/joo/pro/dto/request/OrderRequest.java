@@ -20,13 +20,4 @@ public class OrderRequest {
     private Long customerId;
     private List<ClothesDtoRequest> clothesList;
 
-//    private String clothesType;
-//    private String comment;
-//    private String category;
-//    private String serviceType;
-//    private String status;
-//    private String price;
-//
-//    private int count;
-
 }
