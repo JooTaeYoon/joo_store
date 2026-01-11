@@ -1,5 +1,6 @@
 package com.joo.pro.controller;
 
+import com.joo.pro.dto.request.ClothesDtoRequest;
 import com.joo.pro.dto.request.CustomerDtoRequest;
 import com.joo.pro.dto.request.OrderRequest;
 import com.joo.pro.dto.request.PickupDtoRequest;
@@ -71,6 +72,36 @@ public class StoreController {
     }
 
     /**
+     * 손님 이름 및 번호(뒷자리 4자리)로 검색
+     *
+     * @param request
+     * @return
+     */
+    @GetMapping("/search")
+    public ResponseEntity<List<CustomerDtoResponse>> searchCustomers(@RequestParam("query") String query) throws IllegalAccessException {
+        log.info("request = {}", query);
+        List<CustomerDtoResponse> byOrderCustomerId = customerService.findByOrderCustomerId(query);
+        log.info("byOrderCustomerId = {}", byOrderCustomerId);
+
+        return ResponseEntity.ok(byOrderCustomerId);
+    }
+
+    /**
+     * 옷 정보 수정
+     *
+     * @param id      손님 번호
+     * @param request 수정 할 옷 정보
+     * @return
+     */
+    @PutMapping("/{id}/update")
+    public ResponseEntity<?> saveUpdatedHistory(@PathVariable("id") Long id, @RequestBody OrderRequest request) {
+        log.info("옷 정보 수정: {}", request);
+        clothesService.saveUpdatedHistory(id, request);
+        return ResponseEntity.ok().build();
+    }
+
+
+    /**
      * 모든 손님 정보 가져오기
      *
      * @return
@@ -103,7 +134,7 @@ public class StoreController {
     @PostMapping("/{id}/save/clothes")
     @Operation(summary = "손님 옷 저장", description = "손님이 맡긴 옷 정보를 저장합니다.")
     public ResponseEntity<?> saveClothesToCustomer(@PathVariable("id") Long id, @RequestBody OrderRequest request) {
-        return ResponseEntity.ok(clothesService.saveClothes(id,  request));
+        return ResponseEntity.ok(clothesService.saveClothes(id, request));
     }
 
     /**

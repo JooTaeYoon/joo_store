@@ -83,10 +83,14 @@ public class Clothes {
                 case "defect":
                 case "Defect":
                 case "DEFECT":
+                case "O":
+                case "o":
                     return DEFECT;
                 case "none":
                 case "NONE":
                 case "None":
+                case "X":
+                case "x":
                     return NONE;
                 default:
                     throw new IllegalAccessException("잘못됨");
