@@ -88,7 +88,9 @@
                             </thead>
                             <tbody>
                               <tr v-for="item in clothesHistory" :key="item.id">
-                                <td>{{ formatDateShort(item.createdAt) }}</td>
+                                <td class="date-col">
+                                  {{ formatDateShort(item.createdAt) }}
+                                </td>
 
                                 <template v-if="isEditMode">
                                   <td>
@@ -100,7 +102,7 @@
                                   <td>
                                     <select
                                       v-model="item.serviceType"
-                                      class="edit-select"
+                                      class="edit-select service-sel"
                                     >
                                       <option value="세탁">세탁</option>
                                       <option value="드라이">드라이</option>
@@ -112,7 +114,7 @@
                                   <td>
                                     <select
                                       v-model="item.status"
-                                      class="edit-select"
+                                      class="edit-select small-sel"
                                     >
                                       <option value="X">X</option>
                                       <option value="O">O</option>
@@ -121,18 +123,21 @@
                                   <td>
                                     <select
                                       v-model="item.pickUp"
-                                      class="edit-select"
+                                      class="edit-select small-sel"
                                     >
                                       <option value="X">X</option>
                                       <option value="O">O</option>
                                     </select>
                                   </td>
-                                  <td>
-                                    <input
-                                      type="number"
-                                      v-model="item.price"
-                                      class="edit-input-price"
-                                    />원
+                                  <td class="price-col">
+                                    <div class="price-input-wrapper">
+                                      <input
+                                        type="number"
+                                        v-model="item.price"
+                                        class="edit-input-price"
+                                      />
+                                      <span class="unit">원</span>
+                                    </div>
                                   </td>
                                 </template>
 
@@ -226,7 +231,7 @@ const hasSearched = ref(false);
 const openedId = ref(null);
 const clothesHistory = ref([]);
 const isHistoryLoading = ref(false);
-const isEditMode = ref(false); // 수정 모드 상태
+const isEditMode = ref(false);
 
 const API_BASE = 'http://localhost:8080/api/store';
 
@@ -244,7 +249,7 @@ const searchCustomers = async () => {
     });
     customers.value = response.data;
   } catch (error) {
-    alert('검색 오류');
+    alert('검색 중 오류 발생');
   } finally {
     isSearching.value = false;
   }
@@ -273,14 +278,13 @@ const closeDrawer = () => {
   isEditMode.value = false;
 };
 
-/**
- * 세탁 기록 수정 사항 저장
- * @param customerId
- */
 const saveUpdatedHistory = async (customerId) => {
-  console.log(clothesHistory.value);
   try {
-    await axios.put(`${API_BASE}/${customerId}/update`, clothesHistory.value);
+    console.log('Saving updated history:', clothesHistory.value);
+    // 백엔드 파라미터 타입(List<OrderRequest>)에 맞춰 배열 전송
+    await axios.put(`${API_BASE}/${customerId}/update`, {
+      clothesList: clothesHistory.value,
+    });
     alert('수정이 완료되었습니다.');
     isEditMode.value = false;
   } catch (error) {
@@ -304,7 +308,7 @@ const goToOrder = (id) =>
 </script>
 
 <style scoped>
-/* 기존 배경 및 컨테이너 스타일 그대로 유지 */
+/* 컨테이너 및 기본 테이블 */
 .search-container {
   width: 95%;
   margin: 20px auto;
@@ -320,6 +324,7 @@ const goToOrder = (id) =>
   border: 1px solid #4a2828;
   background-color: #2d2424;
   color: white;
+  font-size: 1rem;
 }
 .main-search-btn {
   background-color: #42b983;
@@ -328,6 +333,7 @@ const goToOrder = (id) =>
   border: none;
   border-radius: 4px;
   font-weight: bold;
+  cursor: pointer;
 }
 
 .customer-table {
@@ -345,29 +351,30 @@ const goToOrder = (id) =>
   text-align: center;
 }
 
-/* 상세 서랍 영역 디자인 유지 */
+/* 상세 서랍 디자인 */
 .detail-container {
   background-color: #151111;
   border: 2px solid #42b983;
   margin: 10px;
-  padding: 20px;
+  padding: 15px;
   border-radius: 10px;
+  transition: border 0.3s;
 }
 .edit-mode-border {
   border-color: #4a90e2 !important;
-} /* 수정 시 파란색 강조 */
+}
 
 .history-scroll-box {
-  max-height: 350px;
+  max-height: 400px;
   overflow-y: auto;
   background-color: #1a1515;
   border-radius: 8px;
   border: 1px solid #333;
-  margin-bottom: 20px;
 }
 .history-table {
   width: 100%;
   border-collapse: collapse;
+  table-layout: auto;
 }
 .history-table th {
   position: sticky;
@@ -376,27 +383,60 @@ const goToOrder = (id) =>
   z-index: 5;
   border-bottom: 2px solid #42b983;
   padding: 12px;
+  font-size: 0.9rem;
 }
 .history-table td {
-  padding: 12px;
+  padding: 10px 5px;
   border-bottom: 1px solid #333;
   text-align: center;
+  vertical-align: middle;
 }
 
-/* 수정 모드 입력 필드 스타일 */
+/* [핵심] 수정 모드 인풋 스타일 개선 */
 .edit-input,
-.edit-select,
-.edit-input-price {
+.edit-select {
+  width: 100%;
+  box-sizing: border-box;
   background: #111;
   border: 1px solid #444;
   color: white;
-  padding: 5px;
+  padding: 8px 4px;
   border-radius: 4px;
   text-align: center;
-  width: 80%;
+  font-size: 0.9rem;
+}
+
+/* 상태, 회수 등 짧은 선택창 크기 최적화 */
+.small-sel {
+  min-width: 50px;
+  max-width: 60px;
+  appearance: none; /* 브라우저 기본 화살표 제거 가능 (취향껏) */
+  padding-left: 10px;
+}
+
+.service-sel {
+  min-width: 80px;
+}
+
+/* 금액 입력창 레이아웃 */
+.price-input-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
 }
 .edit-input-price {
-  width: 60px;
+  width: 80px;
+  background: #111;
+  border: 1px solid #444;
+  color: white;
+  padding: 8px 4px;
+  border-radius: 4px;
+  text-align: right;
+}
+.unit {
+  font-size: 0.85rem;
+  color: #aaa;
 }
 
 /* 상태 배지 */
@@ -417,21 +457,22 @@ const goToOrder = (id) =>
   font-weight: bold;
 }
 
-/* 하단 버튼 디자인 유지 및 추가 */
+/* 버튼 디자인 */
 .action-btns {
   display: flex;
-  gap: 12px;
+  gap: 10px;
+  margin-top: 15px;
 }
 .btn-order,
 .btn-edit-mode,
 .btn-save-edit,
 .btn-cancel {
   flex: 1;
-  padding: 16px;
+  padding: 14px;
   border: none;
   border-radius: 8px;
   font-weight: bold;
-  font-size: 1.1rem;
+  font-size: 1rem;
   cursor: pointer;
 }
 .btn-order {
@@ -441,11 +482,11 @@ const goToOrder = (id) =>
 .btn-edit-mode {
   background-color: #4a4141;
   color: white;
-} /* 기존 '정보 수정' 버튼 색상 */
+}
 .btn-save-edit {
   background-color: #4a90e2;
   color: white;
-} /* '저장' 버튼 파란색 */
+}
 .btn-cancel {
   background-color: #555;
   color: white;
@@ -457,5 +498,14 @@ const goToOrder = (id) =>
   color: white;
   font-size: 1.5rem;
   cursor: pointer;
+}
+
+/* 스크롤바 커스텀 */
+.history-scroll-box::-webkit-scrollbar {
+  width: 6px;
+}
+.history-scroll-box::-webkit-scrollbar-thumb {
+  background: #444;
+  border-radius: 10px;
 }
 </style>
