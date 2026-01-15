@@ -6,6 +6,7 @@ import com.joo.pro.dto.request.PickupDtoRequest;
 import com.joo.pro.dto.response.ClothesDtoResponse;
 import com.joo.pro.dto.response.OrderResponse;
 import com.joo.pro.entity.Clothes;
+import com.joo.pro.entity.ClothesPicture;
 import com.joo.pro.entity.Customer;
 import com.joo.pro.entity.Orders;
 import com.joo.pro.repository.ClothesRepository;
@@ -17,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +34,7 @@ public class ClothesServiceImpl implements ClothesService {
 
     @Override
     @Transactional
-    public OrderResponse saveClothes(Long id, OrderRequest request) {
+    public OrderResponse saveClothes(Long id, OrderRequest request, List<MultipartFile> files) {
 
 //        고객 찾기
         Customer customer = customerRepository.findById(id)
@@ -59,12 +61,36 @@ public class ClothesServiceImpl implements ClothesService {
                     .order(order)
 //                    .pickup(dto.getPickup())
                     .build();
+
+            if(files != null && !files.isEmpty()){
+                for (MultipartFile file : files) {
+                    if(!file.isEmpty()){
+                        String storedPath = uploadFile(file);
+
+                        ClothesPicture clothesPicture = ClothesPicture.builder()
+                                .filePos(storedPath)
+                                .clothes(clothes)
+                                .originalFileName(file.getOriginalFilename())
+                                .build();
+                    }
+                }
+            }
+
             order.getClothes().add(clothes);
             clothesRepository.save(clothes);
         }
+
+
         orderRepository.save(order);
         return OrderResponse.fromEntity(order);
     }
+
+    // 파일 업로드 로직 (예시)
+    private String uploadFile(MultipartFile file) {
+        // 실제 저장 로직 구현 (UUID 생성 등)
+        return "/uploads/" + System.currentTimeMillis() + "_" + file.getOriginalFilename();
+    }
+
 
     @Override
     @Transactional(readOnly = true)
