@@ -13,10 +13,13 @@ import com.joo.pro.service.CustomerService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -131,10 +134,42 @@ public class StoreController {
      * @param request 옷 정보
      * @return
      */
+    /*
     @PostMapping("/{id}/save/clothes")
     @Operation(summary = "손님 옷 저장", description = "손님이 맡긴 옷 정보를 저장합니다.")
     public ResponseEntity<?> saveClothesToCustomer(@PathVariable("id") Long id, @RequestBody OrderRequest request) {
         return ResponseEntity.ok(clothesService.saveClothes(id, request));
+    }
+    */
+
+
+    /**
+     * 옷 정보 및 미디어 파일 저장
+     * @param id 저장할 옷장의 ID (Path Variable)
+     * @param request 옷의 상세 정보 (JSON 데이터)
+     * @param files 사진 및 동영상 파일 리스트
+     * @return 저장 완료 응답
+     */
+    @PostMapping(value = "/{id}/save/clothes", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> saveClothes(
+            @PathVariable("id") Long id,
+            @RequestPart("orderRequest") @Valid OrderRequest request,
+            @RequestPart(value = "files", required = false) List<MultipartFile> files) {
+
+        log.info("옷 저장 요청 수신 - 옷장 ID: {}, 항목 수: {}", id, request.getClothesList().size());
+
+        if (files != null) {
+            log.info("업로드된 파일 수: {}", files.size());
+        }
+
+        try {
+            // Service 계층에 ID, 데이터, 파일 리스트 전달
+            clothesService.saveClothes(id, request, files);
+            return ResponseEntity.ok("옷 정보와 파일이 성공적으로 저장되었습니다.");
+        } catch (Exception e) {
+            log.error("저장 중 오류 발생: ", e);
+            return ResponseEntity.internalServerError().body("저장 실패: " + e.getMessage());
+        }
     }
 
     /**
