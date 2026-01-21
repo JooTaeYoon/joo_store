@@ -1,98 +1,176 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { FontAwesome6 } from '@expo/vector-icons';
+import { useRouter } from 'expo-router'; // 화면 이동을 위한 훅
+import React, { useState } from 'react';
+import {
+  ActivityIndicator,
+  Alert,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+export default function CustomerCreateScreen() {
+  const [name, setName] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
-export default function HomeScreen() {
+  // 전화번호 하이픈 자동 입력 로직 (패턴 유지)
+  const formatPhoneNumber = (text: string) => {
+    const cleaned = text.replace(/\D/g, '');
+    const match = cleaned.match(/^(\d{3})(\d{3,4})(\d{4})$/);
+    if (match) return `${match[1]}-${match[2]}-${match[3]}`;
+    return cleaned;
+  };
+
+  const handleRegister = async () => {
+    if (!name || !phoneNumber) {
+      Alert.alert('알림', '이름과 전화번호를 모두 입력해주세요.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await fetch('http://10.0.2.2:8080/api/store/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, phoneNumber }),
+      });
+
+      if (response.ok) {
+        Alert.alert('성공', `${name} 손님이 등록되었습니다.`, [
+          { text: '확인', onPress: () => router.push('/explore') }, // 등록 후 목록으로 이동
+        ]);
+        setName('');
+        setPhoneNumber('');
+      } else {
+        throw new Error('등록 실패');
+      }
+    } catch (error) {
+      Alert.alert('오류', '서버 통신 실패. IP 설정을 확인하세요.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <FontAwesome6 name="user-plus" size={40} color="#2e7d32" />
+        <Text style={styles.title}>신규 손님 등록</Text>
+      </View>
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+      <View style={styles.inputContainer}>
+        <View style={styles.inputWrapper}>
+          <FontAwesome6
+            name="user"
+            size={18}
+            color="#666"
+            style={styles.icon}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="성함"
+            value={name}
+            onChangeText={setName}
+          />
+        </View>
+
+        <View style={styles.inputWrapper}>
+          <FontAwesome6
+            name="phone"
+            size={18}
+            color="#666"
+            style={styles.icon}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="전화번호"
+            value={phoneNumber}
+            keyboardType="phone-pad"
+            maxLength={13}
+            onChangeText={(text) => setPhoneNumber(formatPhoneNumber(text))}
+          />
+        </View>
+
+        {/* 등록 버튼 */}
+        <TouchableOpacity
+          style={styles.button}
+          onPress={handleRegister}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.buttonText}>등록하기</Text>
+          )}
+        </TouchableOpacity>
+
+        {/* 모든 손님 보기 버튼 (추가됨) */}
+        <TouchableOpacity
+          style={styles.outlineButton}
+          onPress={() => router.push('/explore')}
+        >
+          <FontAwesome6
+            name="users"
+            size={16}
+            color="#2e7d32"
+            style={{ marginRight: 8 }}
+          />
+          <Text style={styles.outlineButtonText}>모든 손님 보기</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
+  container: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+    padding: 20,
+    justifyContent: 'center',
+  },
+  header: { alignItems: 'center', marginBottom: 30 },
+  title: { fontSize: 22, fontWeight: 'bold', marginTop: 10, color: '#333' },
+  inputContainer: {
+    backgroundColor: '#fff',
+    padding: 25,
+    borderRadius: 15,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+  },
+  inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+    marginBottom: 20,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  icon: { marginRight: 10 },
+  input: { flex: 1, height: 45, fontSize: 16 },
+  button: {
+    backgroundColor: '#2e7d32',
+    height: 50,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 12,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  buttonText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
+  // 테두리만 있는 버튼 스타일
+  outlineButton: {
+    flexDirection: 'row',
+    height: 50,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#2e7d32',
   },
+  outlineButtonText: { color: '#2e7d32', fontSize: 16, fontWeight: 'bold' },
 });
