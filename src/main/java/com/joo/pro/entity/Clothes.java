@@ -7,7 +7,9 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 @Entity
 @Table(name = "clothes")
@@ -33,6 +35,11 @@ public class Clothes {
     @JoinColumn(name = "order_id")
     @JsonIgnore
     private Orders order;
+
+    //    손님이 맡긴 옷들의 정보들
+    @OneToMany(mappedBy = "clothes", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<ClothesPicture> clothesPictures = new ArrayList<>();
 
     //    상의인지 하의인지
     @Column(length = 300)

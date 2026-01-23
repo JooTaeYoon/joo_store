@@ -6,8 +6,10 @@ import com.joo.pro.dto.request.PickupDtoRequest;
 import com.joo.pro.dto.response.ClothesDtoResponse;
 import com.joo.pro.dto.response.OrderResponse;
 import com.joo.pro.entity.Clothes;
+import com.joo.pro.entity.ClothesPicture;
 import com.joo.pro.entity.Customer;
 import com.joo.pro.entity.Orders;
+import com.joo.pro.repository.ClothesPictureRepository;
 import com.joo.pro.repository.ClothesRepository;
 import com.joo.pro.repository.OrderRepository;
 import com.joo.pro.repository.CustomerRepository;
@@ -17,9 +19,17 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @Slf4j
@@ -29,10 +39,11 @@ public class ClothesServiceImpl implements ClothesService {
     private final ClothesRepository clothesRepository;
     private final CustomerRepository customerRepository;
     private final OrderRepository orderRepository;
+    private final ClothesPictureRepository cpRepository;
 
     @Override
     @Transactional
-    public OrderResponse saveClothes(Long id, OrderRequest request) {
+    public OrderResponse saveClothes(Long id, OrderRequest request, List<MultipartFile> files) {
 
 //        고객 찾기
         Customer customer = customerRepository.findById(id)
@@ -43,7 +54,6 @@ public class ClothesServiceImpl implements ClothesService {
         Orders order = Orders.builder()
                 .count(request.getClothesList().size())
                 .customer(customer)
-//                .clothes(request.getClothesList())
                 .build();
         log.info("order = {}", order);
 
@@ -52,19 +62,63 @@ public class ClothesServiceImpl implements ClothesService {
             Clothes clothes = Clothes.builder()
                     .clothesType(dto.getClothesType())
                     .serviceType(serviceType)
-//                    .category(Clothes.CATEGORY.valueOf(String.valueOf(dto.getCategory())))
                     .comment(dto.getComment())
-//                    .status(Clothes.STATUS.valueOf(String.valueOf(dto.getStatus())))
                     .price(dto.getPrice())
                     .order(order)
-//                    .pickup(dto.getPickup())
                     .build();
+
+            log.info("files => {}", files);
+
+            if (files != null && !files.isEmpty()) {
+                for (MultipartFile file : files) {
+                    if (!file.isEmpty()) {
+                        String storedPath = uploadFile(file);
+
+                        ClothesPicture clothesPicture = ClothesPicture.builder()
+                                .filePos(storedPath)
+                                .clothes(clothes)
+                                .originalFileName(file.getOriginalFilename())
+                                .build();
+
+                        cpRepository.save(clothesPicture);
+                    }
+                }
+            }
+
             order.getClothes().add(clothes);
             clothesRepository.save(clothes);
         }
+
         orderRepository.save(order);
         return OrderResponse.fromEntity(order);
     }
+
+    private String uploadFile(MultipartFile file) {
+        // 1. 저장할 디렉토리 설정 및 생성
+        String uploadDir = "/Users/taeyoonjoo/Desktop/ing/pic/"; // 본인의 실제 경로로 수정
+        File dir = new File(uploadDir);
+
+        if (!dir.exists()) {
+            dir.mkdirs(); // 폴더가 없으면 생성
+        }
+
+        // 2. 파일명 중복 방지 (UUID)
+        String originalFileName = file.getOriginalFilename();
+        String savedName = UUID.randomUUID().toString() + "_" + originalFileName;
+        Path targetPath = Paths.get(uploadDir).resolve(savedName);
+
+        try {
+            Files.copy(file.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
+
+            log.info("파일 저장 완료: {}", targetPath.toString());
+            return "/Users/taeyoonjoo/Desktop/ing/pic/" + savedName; // DB 저장용 경로
+
+        } catch (IOException e) {
+            log.error("파일 저장 실패: {}", originalFileName, e);
+            throw new RuntimeException("파일 저장 중 오류가 발생했습니다: " + e.getMessage());
+        }
+    }
+
 
     @Override
     @Transactional(readOnly = true)
